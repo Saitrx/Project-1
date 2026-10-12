@@ -34,3 +34,15 @@ Needs Playwright with Chromium and ffmpeg. Every frame is a pure function of its
   avenue, plow, giant).
 - `src/shots/` aerial, space and the screen-crack ending.
 - `src/kit/` engine pieces: city, vehicles, first-person arms, characters, physics bake, effects.
+
+## Output
+
+- `final/what_if_cars.mp4` 1080x1920, 30 fps, H.264 High, two-pass ~5,500 kbps (47.9 MB).
+- `final/what_if_cars_HQ_part1..7.mp4` the CRF 12 / veryslow / film master (161 MB) split at whole
+  seconds, ending at scene cuts where a whole scene fits under 30 MB; each part plays on its own.
+  The full master is too big for GitHub; rebuild it with `./encode.sh`, or join the parts:
+  `for i in 1 2 3 4 5 6 7; do echo "file what_if_cars_HQ_part$i.mp4"; done > parts.txt &&
+  ffmpeg -f concat -i parts.txt -c copy what_if_cars_HQ.mp4`
+- `final/stills/` five full-quality stills, a sheet comparing them with the reference, and a 2x
+  crop comparing the lossless source with the HQ and normal encodes.
+- `final/preview_opening_10s.mp4` low-res preview of the wake-up.

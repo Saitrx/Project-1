@@ -39,5 +39,7 @@ for f in os.listdir(os.path.dirname(src) or '.'):
         os.remove(os.path.join(os.path.dirname(src), f))
 for i, (a, b) in enumerate(parts, 1):
     out = f'{stem}_part{i}.mp4'
-    subprocess.check_call(['ffmpeg', '-v', 'error', '-y', '-ss', str(a), '-i', src, '-t', str(b - a), '-c', 'copy', '-movflags', '+faststart', out])
+    # Exact frame count: every whole second starts a closed GOP, so the first (b - a) * 30 packets
+    # are exactly the frames of [a, b).
+    subprocess.check_call(['ffmpeg', '-v', 'error', '-y', '-ss', str(a), '-i', src, '-frames:v', str((b - a) * 30), '-c', 'copy', '-movflags', '+faststart', out])
     print(f'{out}: {a}-{b}s, {os.path.getsize(out)} bytes')
