@@ -220,9 +220,10 @@ export function buildWakeShot(ctx, W) {
     { t: 14.8, yaw: 0.6, pitch: -0.06 },
     { t: 16, yaw: 0.7, pitch: -0.05 },
   ]);
-  const lidT = new Track([[0, 1], [1.5, 1], [2.05, 0.42], [2.25, 0.4], [2.5, 0.94], [2.62, 0.94], [3.08, 0]]);
-  const blurT = new Track([[0, 5.3], [1.5, 5.3], [2.1, 4.1], [2.6, 3.5], [3.0, 2.3], [3.6, 0.7], [4.05, 0]]);
-  const glowT = new Track([[0, 0.3], [1.5, 0.34], [3.1, 0.24]]);
+  // Black, then the eyes open at 0.3 s (one blink) so the city is on screen almost at once.
+  const lidT = new Track([[0, 1], [0.3, 1], [0.75, 0.42], [0.95, 0.4], [1.2, 0.94], [1.32, 0.94], [1.78, 0]]);
+  const blurT = new Track([[0, 5.3], [0.3, 5.3], [0.9, 4.1], [1.4, 3.5], [1.8, 2.3], [2.4, 0.7], [2.85, 0]]);
+  const glowT = new Track([[0, 0], [5, 0]]); // closed lids are plain black
   const dizzy = (t) => smoothstep(5.0, 5.6, t) * (1 - smoothstep(5.6, 8.4, t));
 
   function handTarget(t) {
@@ -256,7 +257,7 @@ export function buildWakeShot(ctx, W) {
         scooter.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -0.45);
       }
       for (const p of peds) p.update(t);
-      pigeons.update(t, pigeonPath, 2.4, 6.4);
+      pigeons.update(t, pigeonPath, 1.4, 5.4);
 
       // Camera.
       let walkSteps = 0;

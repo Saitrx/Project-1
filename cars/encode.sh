@@ -39,4 +39,11 @@ python3 split.py final/what_if_cars.mp4 "$PART_LIMIT"
 # Sound effects for the whole video: build the mix and add it to every HQ part.
 python3 sfx/mix.py
 python3 sfx/mux.py
+
+# One full-length 1080p file with sound for uploading (~9 Mbps, ~78 MB; delivered via GitHub).
+ffmpeg -v error -y -framerate 30 -i out/frames/%05d.png -vf "$VF" -c:v libx264 -profile:v high -preset slow \
+  -b:v 8800k -pass 1 -passlogfile out/fhdpass -g 60 -pix_fmt yuv420p "${COLOR[@]}" -t 70 -an -f mp4 /dev/null
+ffmpeg -v error -y -framerate 30 -i out/frames/%05d.png -i out/sfx_mix.wav -map 0:v -map 1:a -vf "$VF" \
+  -c:v libx264 -profile:v high -preset slow -b:v 8800k -maxrate 14000k -bufsize 20000k -pass 2 -passlogfile out/fhdpass \
+  -g 60 -pix_fmt yuv420p "${COLOR[@]}" -c:a aac -b:a 192k -ar 48000 -t 70 -movflags +faststart final/what_if_cars_FHD.mp4
 ls -la final

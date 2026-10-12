@@ -65,11 +65,11 @@ put(world, 'sirens', 45.0, start=3, gain=-18, lp=5000, fin=0.5, fout=0.03)
 # (~4 s). Then the head turns on the pavement and we push ourselves up (4.45-5.85 s).
 loop(world, 'city_far', 0, 5.5, xfade=2, gain=-9, fin=0.5, fout=2.0)
 loop(body, 'heart_rest', 0, 5.0, xfade=0.3, gain=-8, lp=2000, fin=0.8, fout=2.2)
-put(body, 'wake_groan', 1.2, gain=-13, lp=7000, fin=0.1, fout=0.6)
-put(body, 'wake_swell', 1.45, gain=-20, lp=6000, fin=0.3, fout=0.8)
+put(body, 'wake_groan', 0.15, gain=-13, lp=7000, fin=0.1, fout=0.6)
+put(body, 'wake_swell', 0.3, gain=-20, lp=6000, fin=0.3, fout=0.8)
 put(body, 'head_rustle', 2.9, gain=-16, fout=0.3)
 put(body, 'stand_up', 4.0, gain=-11, fout=0.4)
-put(world, 'pigeons', 2.15, gain=-13, pan=-0.2, fout=0.5)
+put(world, 'pigeons', 1.15, gain=-13, pan=-0.2, fout=0.5)
 # Traffic going by (northbound lanes on our left; the hero taxi is a little lower and closer).
 for t, g, p, pitch in [(0.85, -10, -0.35, 1.0), (2.85, -13, -0.5, 1.02), (4.2, -16, -0.7, 0.97), (6.7, -5, -0.35, 0.92),
                        (7.45, -11, -0.5, 1.0), (10.6, -17, -0.7, 0.95)]:
@@ -264,11 +264,11 @@ put(body, 'tinnitus', HIT + 0.1, gain=-24, lp=7000, fin=0.2, fout=1.4, dur=2.6)
 w = reverb(world.x, rt=1.1, wet=-13)
 # Waking: the world starts far away and dull and opens up as our eyes open (lids part at 1.5-2.05,
 # blink, open at 3.1, focus by 4.05, standing at 5.85). Then again after the shock knocks us down.
-w = muffle(w, [(0, 1.0), (1.5, 1.0), (2.05, 0.72), (2.3, 0.8), (2.62, 0.6), (3.1, 0.38), (4.05, 0.1), (4.6, 0.0),
+w = muffle(w, [(0, 1.0), (0.3, 1.0), (0.85, 0.72), (1.1, 0.8), (1.42, 0.6), (1.9, 0.38), (2.85, 0.1), (3.4, 0.0),
                (SHOCK + 0.05, 0.0), (SHOCK + 0.2, 0.9), (LAND + 0.3, 0.88), (43.4, 0.55),
                (44.3, 0.2), (45.0, 0.0)])
 t = np.arange(len(w)) / SR
-lift = np.interp(t, [0, 1.5, 3.1, 4.2, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
+lift = np.interp(t, [0, 0.3, 1.9, 3.0, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
                  [-12, -11, -4, 0, 0, -8, -5, 0])
 w *= (10 ** (lift / 20))[:, None]
 mix = w + body.x
