@@ -222,9 +222,29 @@ export function buildWakeShot(ctx, W) {
   ]);
   // Black, then the eyes open at 0.3 s (one blink) so the city is on screen almost at once.
   const lidT = new Track([[0, 1], [0.3, 1], [0.75, 0.42], [0.95, 0.4], [1.2, 0.94], [1.32, 0.94], [1.78, 0]]);
-  const blurT = new Track([[0, 5.3], [0.3, 5.3], [0.9, 4.1], [1.4, 3.5], [1.8, 2.3], [2.4, 0.7], [2.85, 0]]);
+  const blurT = new Track([[0, 5.3], [0.2, 5.3], [0.9, 4.4], [1.45, 3.8], [1.9, 3.0], [2.35, 1.6], [2.7, 0.5], [3.0, 0]]);
   const glowT = new Track([[0, 0], [5, 0]]); // closed lids are plain black
   const dizzy = (t) => smoothstep(5.0, 5.6, t) * (1 - smoothstep(5.6, 8.4, t));
+
+  // Eyelids: real blink footage played 1.4x from clip time 0.45 s, black at first, a slit that
+  // closes again, two heavy blinks, then wide open; the matte fades out by 2.9 s.
+  const eyeTex = new THREE.Texture();
+  eyeTex.colorSpace = THREE.NoColorSpace;
+  eyeTex.generateMipmaps = false;
+  eyeTex.minFilter = THREE.LinearFilter;
+  eyeTex.magFilter = THREE.LinearFilter;
+  const eyeFrames = (ctx.eyeFrames ?? []).filter(Boolean);
+  const EYE_SPEED = 1.4;
+  const EYE_END = 2.9;
+  function eyeFrame(t) {
+    if (!eyeFrames.length || t >= EYE_END) return null;
+    const i = Math.min(eyeFrames.length - 1, Math.round(t * EYE_SPEED * 30));
+    if (eyeTex.image !== eyeFrames[i]) {
+      eyeTex.image = eyeFrames[i];
+      eyeTex.needsUpdate = true;
+    }
+    return eyeTex;
+  }
 
   function handTarget(t) {
     // Right hand comes into view and pushes on the pavement while we sit up.
@@ -296,8 +316,10 @@ export function buildWakeShot(ctx, W) {
         bloomThreshold: 1.7,
         bloomStrength: 0.35,
         exposure: 1.0,
-        lid,
+        lid: eyeFrames.length ? 0 : lid,
         lidGlow: glowT.at(t),
+        eye: eyeFrame(t),
+        eyeOpenMix: smoothstep(2.45, EYE_END, t),
         focusBlur: blurT.at(t),
       };
     },

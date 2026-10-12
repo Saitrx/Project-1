@@ -8,7 +8,18 @@ import { buildWorld } from './street/world.js';
 export async function buildProgram(engine, params) {
   setMaxAniso(params.has('aniso') ? Number(params.get('aniso')) : Math.min(4, engine.maxAniso));
   const only = params.get('shots')?.split(',');
+  const want = (id) => !only || only.includes(id);
   const ctx = { engine, renderer: engine.renderer, pxScale: engine.H / 1920 };
+  // Eyelid matte frames for the wake-up (a green-screen blink clip, cut to the part we use).
+  if (want('wake')) {
+    const urls = Array.from({ length: 117 }, (_, i) => `assets/eye/${String(i).padStart(3, '0')}.png`);
+    ctx.eyeFrames = await Promise.all(urls.map((u) => new Promise((res) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = () => res(null);
+      img.src = u;
+    })));
+  }
   const world = buildWorld(ctx);
   {
     // Shadow-pass material without texture sampling (three copies material.map into the depth
@@ -27,7 +38,6 @@ export async function buildProgram(engine, params) {
   }
   const allObjects = [];
   const shots = [];
-  const want = (id) => !only || only.includes(id);
   const register = (id, s) => {
     s.id = id;
     shots.push(s);

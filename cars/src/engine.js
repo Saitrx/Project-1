@@ -88,6 +88,9 @@ uniform float mixPrev;
 uniform float fade;
 uniform float lid;        // 0 = eyes fully open, 1 = closed
 uniform float lidGlow;    // warm light through the eyelids
+uniform sampler2D tEye;   // eyelid matte (green = open), from a blink clip
+uniform float eyeMatte;   // 1 = use tEye
+uniform float eyeOpenMix; // 0..1 fades the matte out to fully open
 uniform float grain;
 uniform float useOverlay;
 uniform float useDither;
@@ -156,6 +159,15 @@ void main() {
     vec3 glow = vec3(1.0, 0.34, 0.12) * lidGlow * (0.45 + 0.55 * smoothstep(0.0, 1.0, vUv.y));
     glow *= 0.7 + 0.3 * dot(texture2D(tBlurB, vUv).rgb, vec3(0.3));
     c = mix(glow, c, m);
+  }
+  if (eyeMatte > 0.5) {
+    // Real blink footage as the eyelids: green is where we see through, the rest (black lids with
+    // a faint red rim) is kept as it is.
+    vec3 e = texture2D(tEye, vUv).rgb;
+    float key = clamp((e.g - max(e.r, e.b) - 0.04) / 0.6, 0.0, 1.0);
+    key = mix(key, 1.0, eyeOpenMix);
+    vec3 lidCol = vec3(e.r, min(e.g, max(e.r, e.b)), e.b);
+    c = mix(lidCol, c, key);
   }
   if (grain > 0.0) {
     float g = hash(gl_FragCoord.xy * 0.73 + vec2(frame * 13.1, frame * 7.7)) - 0.5;
@@ -288,6 +300,9 @@ export class Engine {
       fade: { value: 1 },
       lid: { value: 0 },
       lidGlow: { value: 0 },
+      tEye: { value: null },
+      eyeMatte: { value: 0 },
+      eyeOpenMix: { value: 0 },
       grain: { value: 0.012 },
       useOverlay: { value: 1 },
       useDither: { value: 1 },
@@ -391,6 +406,9 @@ export class Engine {
     u.tint.value.set(p.tint ?? 0xffffff);
     u.lid.value = p.lid ?? 0;
     u.lidGlow.value = p.lidGlow ?? 0;
+    u.eyeMatte.value = p.eye ? 1 : 0;
+    if (p.eye) u.tEye.value = p.eye;
+    u.eyeOpenMix.value = p.eyeOpenMix ?? 0;
     u.grain.value = p.grain ?? 0.012;
     u.fade.value = fade * (p.fade ?? 1);
     u.frame.value = frame;
@@ -419,6 +437,7 @@ export class Engine {
     const u = this.finalMat.uniforms;
     u.fade.value = 0;
     u.lid.value = 0;
+    u.eyeMatte.value = 0;
     u.grain.value = 0;
     u.blurMode.value = 0;
     u.bloomStrength.value = 0;

@@ -264,11 +264,11 @@ put(body, 'tinnitus', HIT + 0.1, gain=-24, lp=7000, fin=0.2, fout=1.4, dur=2.6)
 w = reverb(world.x, rt=1.1, wet=-13)
 # Waking: the world starts far away and dull and opens up as our eyes open (lids part at 1.5-2.05,
 # blink, open at 3.1, focus by 4.05, standing at 5.85). Then again after the shock knocks us down.
-w = muffle(w, [(0, 1.0), (0.3, 1.0), (0.85, 0.72), (1.1, 0.8), (1.42, 0.6), (1.9, 0.38), (2.85, 0.1), (3.4, 0.0),
+w = muffle(w, [(0, 1.0), (0.15, 1.0), (0.6, 0.75), (1.1, 0.82), (1.45, 0.85), (1.7, 0.6), (2.0, 0.66), (2.3, 0.35), (2.6, 0.15), (3.2, 0.0),
                (SHOCK + 0.05, 0.0), (SHOCK + 0.2, 0.9), (LAND + 0.3, 0.88), (43.4, 0.55),
                (44.3, 0.2), (45.0, 0.0)])
 t = np.arange(len(w)) / SR
-lift = np.interp(t, [0, 0.3, 1.9, 3.0, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
+lift = np.interp(t, [0, 0.15, 2.3, 3.0, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
                  [-12, -11, -4, 0, 0, -8, -5, 0])
 w *= (10 ** (lift / 20))[:, None]
 mix = w + body.x
