@@ -136,7 +136,7 @@ export async function buildSpaceShot(ctx) {
   scene.add(v.group);
   const carPos = new THREE.Vector3(0.8, -9.6, 1.0);
 
-  const camera = makeCamera(66, 0.05, 3000);
+  const camera = makeCamera(66, 5, 2000);
   return {
     ownScene: true,
     scene,

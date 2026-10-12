@@ -205,6 +205,7 @@ export function buildAerialShot(ctx) {
       const drift1 = (t - T0) * 0.6;
       const pos = viewDir.clone().multiplyScalar(D).addScaledVector(carDir.clone().multiplyScalar(-1), drift1 * (Lc / 46));
       camera.position.set(pos.x, height, pos.z);
+      camera.near = Math.max(0.004, height * 0.02); camera.updateProjectionMatrix();
       const target = new THREE.Vector3(0, 0.42 * 1.52e-3 * s, 0).addScaledVector(carDir, -0.1 * L);
       target.y = lerp(target.y, height - 0.6, smoothstep(57.2, 58.5, t));
       camera.up.set(0, 1, 0);
