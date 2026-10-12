@@ -177,6 +177,28 @@ export function drawOverlay(ctx, W, H, t) {
   drawEndCard(ctx, k, t);
 }
 
+// Cover / thumbnail: the title large over the top of a clean frame, "bigger?" in taxi yellow.
+export function drawCover(ctx, W, H) {
+  const k = W / 1080;
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 120 * k, 0, 980 * k);
+  g.addColorStop(0, 'rgba(0,0,0,0.5)');
+  g.addColorStop(0.55, 'rgba(0,0,0,0.28)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, 980 * k);
+  const size = 116;
+  const font = `500 {s} ${SERIF}`;
+  text(ctx, k, 'What if cars kept', 540, 520, { font, size, align: 'center', shadow: 0.75 });
+  const a = 'getting ';
+  const b = 'bigger?';
+  const wa = measure(ctx, k, a, font, size);
+  const wb = measure(ctx, k, b, font, size);
+  const x0 = 540 - (wa + wb) / 2;
+  text(ctx, k, a, x0, 650, { font, size, shadow: 0.75 });
+  text(ctx, k, b, x0 + wa, 650, { font, size, color: '#f6c623', shadow: 0.75 });
+}
+
 export const FONTS = [
   `500 100px ${SERIF}`,
   `italic 400 100px ${SERIF}`,

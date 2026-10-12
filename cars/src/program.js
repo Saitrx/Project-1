@@ -1,7 +1,7 @@
 // Picks the shot for each frame, renders it, and composites the 4K text layer last.
 import * as THREE from 'three';
 import { FPS, BEATS } from './timeline.js';
-import { drawOverlay } from './overlay.js';
+import { drawOverlay, drawCover } from './overlay.js';
 import { setMaxAniso } from './kit/textures.js';
 import { buildWorld } from './street/world.js';
 
@@ -79,7 +79,8 @@ export async function buildProgram(engine, params) {
   function render(n) {
     const t = n / FPS;
     const shot = shotAt(t);
-    drawOverlay(engine.overlayCtx, engine.W, engine.H, t);
+    if (params.has('cover')) drawCover(engine.overlayCtx, engine.W, engine.H);
+    else drawOverlay(engine.overlayCtx, engine.W, engine.H, t);
     if (!shot) {
       engine.presentBlack(n);
       return;

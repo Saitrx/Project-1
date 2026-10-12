@@ -46,3 +46,5 @@ Needs Playwright with Chromium and ffmpeg. Every frame is a pure function of its
 - `final/stills/` five full-quality stills, a sheet comparing them with the reference, and a 2x
   crop comparing the lossless source with the HQ and normal encodes.
 - `final/preview_opening_10s.mp4` low-res preview of the wake-up.
+- `final/cover.png` / `cover.jpg` 1080x1920 cover: a clean frame (0:56.3) with the title, rendered
+  with `node render.mjs --frames 1690 --query "shots=aerial&cover" --out out/cover`.
