@@ -4,7 +4,7 @@ export const FPS = 30;
 export const DURATION = 70;
 export const TOTAL_FRAMES = FPS * DURATION;
 export const TITLE_LINES = ['What if cars kept', 'getting bigger?'];
-export const TITLE_TIME = { in: 4.4, out: 7.3 };
+export const TITLE_TIME = { in: 1.5, out: 7.3 };
 export const HUD_IN = 6.0;
 
 // Each beat: [start, end, counter value, fact line, caption]

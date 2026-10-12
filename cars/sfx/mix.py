@@ -46,7 +46,7 @@ def step_slices(name, gap=0.4, length=0.42):
 
 # ---- ambience and the growing low end (whole stretch) -------------------------------------------------
 loop(world, 'amb_city', 0, LEN, xfade=3, gain=-8, fin=0, fout=0.05,
-     auto=[(0, 0), (21, 0), (27, -3), (33, -6), (45, -9), (51, -9)])
+     auto=[(0, -30), (1.5, -18), (3.1, -5), (4.2, 0), (21, 0), (27, -3), (33, -6), (45, -9), (51, -9)])
 # Sub rumble of the giant cars: in as soon as they are heavy, deeper and louder with each beat.
 loop(world, 'giant_rumble', 16, 21, xfade=2, pitch=0.9, lp=180, gain=-22, fin=1.0, fout=0.05, auto=[(16, -4), (19, 0), (21, -2)])
 loop(world, 'giant_rumble', 21, 33, xfade=2, pitch=0.85, lp=260, gain=-15, fin=0.05, fout=0.05, auto=[(21, 0), (26, -3), (28, 3), (33, 4)])
@@ -58,13 +58,16 @@ put(world, 'sirens', 33.5, gain=-20, lp=5000, fin=3, fout=0.05, auto=[(33.5, 0),
 put(world, 'sirens', 45.0, start=3, gain=-18, lp=5000, fin=0.5, fout=0.03)
 
 # ---- 0:00-0:16 waking up on the sidewalk, walking, 1.2x scooter clip, 1.5x squeeze --------------------
-# Inside: a slow, deep heartbeat and a groggy breath while the world is still far away.
-loop(body, 'heart_fast', 0, 8.0, xfade=0.25, pitch=0.6, lp=900, gain=-9, fin=0.6, fout=2.5)
-put(body, 'wake_breath', 1.25, gain=-12, lp=6000, fin=0.3, fout=1.0)
-put(body, 'wake_breath', 4.6, start=0.6, dur=2.6, gain=-14, fin=0.2, fout=0.8)  # pushing up off the pavement
-# Feet walking past our head, pigeons taking off overhead.
-put(world, 'walk_steps', 0.0, dur=4.8, gain=-14, pan=0.3, fin=0.5, fout=1.0)
-put(world, 'pigeons', 2.15, gain=-11, pan=-0.2, fout=0.5)
+# Eyes closed: only a calm heartbeat and the city as a far, low hum. A sleepy groan and breath as
+# the lids part (1.5 s, with the title); a soft swell carries the street in until the eyes focus
+# (~4 s). Then the head turns on the pavement and we push ourselves up (4.45-5.85 s).
+loop(world, 'city_far', 0, 5.5, xfade=2, gain=-6, fin=0.5, fout=2.0)
+loop(body, 'heart_rest', 0, 5.0, xfade=0.3, gain=-12, lp=2000, fin=0.8, fout=2.2)
+put(body, 'wake_groan', 1.15, gain=-13, lp=7000, fin=0.1, fout=0.6)
+put(body, 'wake_swell', 1.5, gain=-20, lp=6000, fin=0.6, fout=1.0, dur=2.6)
+put(body, 'head_rustle', 3.55, gain=-16, fout=0.3)
+put(body, 'stand_up', 4.5, gain=-11, fout=0.4)
+put(world, 'pigeons', 2.15, gain=-13, pan=-0.2, fout=0.5)
 # Traffic going by (northbound lanes on our left; the hero taxi is a little lower and closer).
 for t, g, p, pitch in [(0.85, -10, -0.35, 1.0), (2.85, -13, -0.5, 1.02), (4.2, -16, -0.7, 0.97), (6.7, -5, -0.35, 0.92),
                        (7.45, -11, -0.5, 1.0), (10.6, -17, -0.7, 0.95)]:
@@ -164,12 +167,12 @@ put(world, 'car_alarms', 45.0, gain=-19, lp=5000, pan=0.3, fin=0.05, fout=0.05, 
 w = reverb(world.x, rt=1.1, wet=-13)
 # Waking: the world starts far away and dull and opens up as our eyes open (lids part at 1.5-2.05,
 # blink, open at 3.1, focus by 4.05, standing at 5.85). Then again after the shock knocks us down.
-w = muffle(w, [(0, 1.0), (1.5, 1.0), (2.05, 0.82), (2.4, 0.88), (2.62, 0.75), (3.1, 0.6), (4.05, 0.42), (5.1, 0.25),
-               (5.85, 0.12), (7.0, 0.0), (SHOCK + 0.05, 0.0), (SHOCK + 0.2, 0.9), (LAND + 0.3, 0.88), (43.4, 0.55),
+w = muffle(w, [(0, 1.0), (1.5, 1.0), (2.05, 0.72), (2.3, 0.8), (2.62, 0.6), (3.1, 0.38), (4.05, 0.1), (4.6, 0.0),
+               (SHOCK + 0.05, 0.0), (SHOCK + 0.2, 0.9), (LAND + 0.3, 0.88), (43.4, 0.55),
                (44.3, 0.2), (45.0, 0.0)])
 t = np.arange(len(w)) / SR
-lift = np.interp(t, [0, 1.5, 3.1, 5.85, 7.2, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
-                 [-16, -14, -8, -3, 0, 0, -8, -5, 0])
+lift = np.interp(t, [0, 1.5, 3.1, 4.2, SHOCK + 0.05, SHOCK + 0.25, 43.4, 45.0],
+                 [-12, -11, -4, 0, 0, -8, -5, 0])
 w *= (10 ** (lift / 20))[:, None]
 mix = w + body.x
 fade = int(0.03 * SR)
