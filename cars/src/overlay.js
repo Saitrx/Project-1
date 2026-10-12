@@ -136,44 +136,40 @@ function drawCaption(ctx, k, t) {
   }
 }
 
-// Hook title: the words pop in one after another with a small overshoot, "bigger?" in taxi yellow.
+// Hook title: the whole title pops in at once with one small overshoot; "bigger?" in taxi yellow.
 const TITLE_SIZE = 84;
 const TITLE_Y = [452, 548];
 function easeOutBack(u) {
-  const c1 = 2.2;
+  const c1 = 1.9;
   const c3 = c1 + 1;
   return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2);
 }
 function drawTitle(ctx, k, t) {
   const out = clamp((TITLE_TIME.out - t) / 0.5);
-  if (t < TITLE_TIME.in || out <= 0) return;
+  const u = clamp((t - TITLE_TIME.in) / 0.42);
+  if (u <= 0 || out <= 0) return;
+  const a = clamp(u / 0.3) * out;
+  const s = u >= 1 ? 1 : 0.55 + 0.45 * easeOutBack(u);
   const font = `500 {s} ${SERIF}`;
-  softPatch(ctx, k, 540, 500, 460, 170, out * clamp((t - TITLE_TIME.in) / 0.3));
-  let n = 0;
+  softPatch(ctx, k, 540, 500, 460, 170, a);
+  ctx.save();
+  // Scale about the centre of the title block; at rest (s = 1) everything sits on whole pixels.
+  ctx.translate(540 * k, 500 * k);
+  ctx.scale(s, s);
+  ctx.translate(-540 * k, -500 * k);
   TITLE_LINES.forEach((ln, li) => {
     const words = ln.split(' ');
     const space = measure(ctx, k, ' ', font, TITLE_SIZE);
     const widths = words.map((w) => measure(ctx, k, w, font, TITLE_SIZE));
-    const total = widths.reduce((a, b) => a + b, 0) + space * (words.length - 1);
+    const total = widths.reduce((x, y) => x + y, 0) + space * (words.length - 1);
     let x = 540 - total / 2;
     words.forEach((w, wi) => {
-      const t0 = TITLE_TIME.in + n * 0.11;
-      n++;
-      const u = clamp((t - t0) / 0.32);
-      const cx = Math.round(x + widths[wi] / 2);
-      x += widths[wi] + space;
-      if (u <= 0) return;
-      const s = u >= 1 ? 1 : 0.35 + 0.65 * easeOutBack(u);
-      const a = clamp(u / 0.35) * out;
-      ctx.save();
-      ctx.translate(cx * k, (TITLE_Y[li] - TITLE_SIZE * 0.32) * k);
-      ctx.scale(s, s);
-      ctx.translate(-cx * k, -(TITLE_Y[li] - TITLE_SIZE * 0.32) * k);
       const yellow = w.startsWith('bigger');
-      text(ctx, k, w, cx, TITLE_Y[li], { font, size: TITLE_SIZE, align: 'center', alpha: a, shadow: 0.7, color: yellow ? '#f6c623' : '#ffffff' });
-      ctx.restore();
+      text(ctx, k, w, Math.round(x), TITLE_Y[li], { font, size: TITLE_SIZE, alpha: a, shadow: 0.7, color: yellow ? '#f6c623' : '#ffffff' });
+      x += widths[wi] + space;
     });
   });
+  ctx.restore();
 }
 
 function drawEndCard(ctx, k, t) {

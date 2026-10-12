@@ -161,13 +161,12 @@ void main() {
     c = mix(glow, c, m);
   }
   if (eyeMatte > 0.5) {
-    // Real blink footage as the eyelids: green is where we see through, the rest (black lids with
-    // a faint red rim) is kept as it is.
+    // Real blink footage used only as a matte: green is where we see through; the lids are plain
+    // black (none of the clip's own colour, so no green or olive fringe at the soft edges).
     vec3 e = texture2D(tEye, vUv).rgb;
-    float key = clamp((e.g - max(e.r, e.b) - 0.04) / 0.6, 0.0, 1.0);
+    float key = smoothstep(0.05, 0.62, e.g - max(e.r, e.b));
     key = mix(key, 1.0, eyeOpenMix);
-    vec3 lidCol = vec3(e.r, min(e.g, max(e.r, e.b)), e.b);
-    c = mix(lidCol, c, key);
+    c *= key;
   }
   if (grain > 0.0) {
     float g = hash(gl_FragCoord.xy * 0.73 + vec2(frame * 13.1, frame * 7.7)) - 0.5;
