@@ -1,11 +1,12 @@
-"""Add out/sfx_mix.wav to every HQ part it fully covers (parts 1-5 for the 0:00-0:51 mix).
+"""Add out/sfx_mix.wav to every HQ part it fully covers (or only the part numbers given).
 Part offsets come from the parts' own durations, in order. The video stream is copied untouched.
-usage: python3 sfx/mux.py
+usage: python3 sfx/mux.py [part numbers...]
 """
 import glob
 import os
 import re
 import subprocess
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MIX = os.path.join(ROOT, 'out', 'sfx_mix.wav')
@@ -18,9 +19,11 @@ def duration(f):
 parts = sorted(glob.glob(os.path.join(ROOT, 'final', 'what_if_cars_HQ_part*.mp4')), key=lambda f: int(re.search(r'part(\d+)', f).group(1)))
 mix_len = duration(MIX)
 start = 0.0
+only = {int(a) for a in sys.argv[1:]}
 for f in parts:
     d = round(duration(f))
-    if start + d <= mix_len + 0.05:
+    num = int(re.search(r'part(\d+)', f).group(1))
+    if start + d <= mix_len + 0.05 and (not only or num in only):
         tmp = f + '.tmp.mp4'
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f, '-ss', f'{start:.3f}', '-t', f'{d:.3f}', '-i', MIX,
                         '-map', '0:v', '-map', '1:a', '-c:v', 'copy',

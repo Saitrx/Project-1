@@ -1,6 +1,6 @@
 #!/bin/bash
-# Encode the rendered 1080x1920 lossless PNG frames into the two deliverables (no audio; the HQ parts
-# that the sound-effects mix covers get it added afterwards, see sfx/):
+# Encode the rendered 1080x1920 lossless PNG frames into the two deliverables (the HQ parts get the
+# sound-effects mix added afterwards, see sfx/; the normal file stays silent):
 #   final/what_if_cars_HQ.mp4  H.264 High, CRF 12, veryslow, tune film, yuv420p, faststart
 #   final/what_if_cars.mp4     two-pass ~5,500 kbps, kept under 50 MB
 # Keyframes are forced on every whole second (which includes every scene cut), so the files can be
@@ -36,7 +36,7 @@ done
 python3 split.py final/what_if_cars_HQ.mp4 "$PART_LIMIT"
 python3 split.py final/what_if_cars.mp4 "$PART_LIMIT"
 
-# Sound effects for 0:00-0:51: build the mix and add it to the HQ parts it covers.
+# Sound effects for the whole video: build the mix and add it to every HQ part.
 python3 sfx/mix.py
 python3 sfx/mux.py
 ls -la final
