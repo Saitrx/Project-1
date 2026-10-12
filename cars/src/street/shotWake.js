@@ -285,7 +285,11 @@ export function buildWakeShot(ctx, W) {
       fp.placeBody(camera, lying ? { mode: 'lie', groundY: 0.15, t } : { mode: t > 6.8 && t < 12.5 ? 'walk' : 'stand', phase: walkSteps / 2, groundY: 0.15, yaw: camera.rotation.y, t, sit: 1 - smoothstep(4.75, 5.8, t) });
       fp.body.root.rotation.y = lying ? 0 : new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ').y + Math.PI;
 
-      W.setShadowFocus(12, Z0 - walkDist(t) - 14, 42);
+      // While the eye is close to the pavement (lying, sitting up, standing), shadow texels project
+      // large: use a denser map and a tighter box, easing back to the walking setup by 8.4 s.
+      W.setShadowMapSize(t >= 1.4 && t < 6.8 ? 8192 : 4096);
+      const sk = smoothstep(6.8, 8.4, t);
+      W.setShadowFocus(lerp(8, 12, sk), lerp(22, Z0 - walkDist(t) - 14, sk), lerp(30, 42, sk));
       const lid = lidT.at(t);
       return {
         bloomThreshold: 1.7,

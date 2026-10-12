@@ -217,6 +217,7 @@ export function buildWorld(ctx) {
   function resetAll() {
     scene.fog.color.copy(FOG.color);
     scene.fog.density = FOG.density;
+    sun.shadow.radius = 1;
     for (const o of resettable) {
       const h = o.userData.home;
       o.position.copy(h.p);
@@ -250,5 +251,13 @@ export function buildWorld(ctx) {
     for (const s of furn.signals) if (s.x > x0 && s.x < x1 && s.z > z0 && s.z < z1) s.group.visible = false;
   }
 
-  return { scene, camera, sun, hemi, sky, city, furn, hero, corners, fp, reg, add, resetAll, crush, setShadowFocus };
+  // Shadow map resolution (reallocated only when it changes).
+  function setShadowMapSize(sz) {
+    if (sun.shadow.mapSize.x === sz) return;
+    sun.shadow.mapSize.set(sz, sz);
+    sun.shadow.map?.dispose();
+    sun.shadow.map = null;
+  }
+
+  return { scene, camera, sun, hemi, sky, city, furn, hero, corners, fp, reg, add, resetAll, crush, setShadowFocus, setShadowMapSize };
 }
