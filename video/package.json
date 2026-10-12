@@ -1,0 +1,16 @@
+{
+  "name": "what-if-ai-video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.1.0",
+    "@fontsource/ibm-plex-sans": "^5.1.0",
+    "@fontsource/source-serif-4": "^5.1.0",
+    "gsap": "^3.12.5",
+    "three": "^0.169.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
+    "ws": "^8.18.0"
+  }
+}
