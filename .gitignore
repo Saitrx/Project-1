@@ -6,3 +6,4 @@ cars/node_modules/
 cars/out/
 cars/final/what_if_cars_HQ.mp4
 cars/final/what_if_cars_part*.mp4
+__pycache__/
