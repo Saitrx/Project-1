@@ -18,7 +18,15 @@ def load(name):
     if name not in _cache:
         raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', os.path.join(CLIPS, name + '.mp3'), '-ac', '2', '-ar', str(SR), '-f', 'f32le', '-'],
                              capture_output=True, check=True).stdout
-        _cache[name] = np.frombuffer(raw, np.float32).reshape(-1, 2).astype(np.float64)
+        x = np.frombuffer(raw, np.float32).reshape(-1, 2).astype(np.float64)
+        # Normalise every clip so its active part (frames within 30 dB of its loudest) sits at
+        # -20 dBFS RMS; cue gains are then relative to that.
+        w = SR // 20
+        n = len(x) // w
+        e = (x[: n * w].reshape(n, w, 2) ** 2).mean((1, 2))
+        active = e[e > e.max() * 1e-3]
+        x *= db(-20) / np.sqrt(active.mean())
+        _cache[name] = x
     return _cache[name]
 
 
