@@ -134,7 +134,7 @@ export async function buildSpaceShot(ctx) {
 
   const v = makeVehicle('taxi');
   scene.add(v.group);
-  const carPos = new THREE.Vector3(1.6, -4.4, 1.0);
+  const carPos = new THREE.Vector3(0.8, -9.6, 1.0);
 
   const camera = makeCamera(66, 0.05, 3000);
   return {
@@ -149,7 +149,7 @@ export async function buildSpaceShot(ctx) {
       // Metres -> thousands of km; centre the car on its body so it grows in place.
       const k = s / 1e6;
       placeVehicle(v, carPos.x, carPos.y - 0.76 * k, carPos.z, -0.62, k);
-      v.group.rotation.set(0.16, -1.05, 0.06);
+      v.group.rotation.set(0.14, -1.3, 0.05);
       earth.rotation.y = 0.03 * (t - T0);
       const d = lerp(40, 37, smoothstep(T0, T1, t));
       camera.position.set(-1.0, 1.0, d);

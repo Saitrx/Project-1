@@ -108,7 +108,7 @@ void main() {
   float a = c.a * m;
   // Dark grey frosting over the broken glass, plus the bright crack lines (HDR so they bloom a little).
   vec3 col = vec3(0.045) * grey + c.rgb * a * 1.6;
-  gl_FragColor = vec4(col, clamp(grey * 0.94 + a, 0.0, 1.0));
+  gl_FragColor = vec4(col, clamp(grey * 0.97 + a, 0.0, 1.0));
 }`;
 
 export function buildCrackShot(ctx) {
@@ -189,7 +189,7 @@ export function buildCrackShot(ctx) {
     update(t) {
       // One slow fade-on of the headlights.
       const on = smoothstep(65.25, 65.75, t);
-      for (const h of heads) h.o.material.color.copy(h.base).multiplyScalar((0.02 + 1.4 * on) * (1 - 0.6 * smoothstep(HIT, HIT + 0.4, t)));
+      for (const h of heads) h.o.material.color.copy(h.base).multiplyScalar((0.02 + 1.4 * on) * (1 - 0.97 * smoothstep(HIT, HIT + 0.4, t)));
       camera.position.set(0, 1.0, 9 - 0.6 * smoothstep(T0, HIT, t));
       camera.lookAt(0, 0.9, 0);
       shake(camera, t, 3.5 * smoothstep(HIT, HIT + 0.04, t) * (1 - smoothstep(HIT + 0.05, HIT + 0.7, t)), { seed: 5, freq: 18, trans: 0.03 });
