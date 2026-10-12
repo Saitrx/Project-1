@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>What if cars kept getting bigger?</title>
+  <style>
+    @font-face { font-family: "EBGaramond"; font-style: normal; font-weight: 500; src: url(node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-500-normal.woff2) format("woff2"); }
+    @font-face { font-family: "EBGaramond"; font-style: italic; font-weight: 400; src: url(node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2) format("woff2"); }
+    @font-face { font-family: "InterUI"; font-style: normal; font-weight: 600; src: url(node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2) format("woff2"); }
+    @font-face { font-family: "JBMono"; font-style: normal; font-weight: 400; src: url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2) format("woff2"); }
+    html, body { margin: 0; background: #000; }
+    canvas { display: block; }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/",
+        "gsap": "./node_modules/gsap/index.js",
+        "cannon-es": "./node_modules/cannon-es/dist/cannon-es.js",
+        "topojson-client": "./node_modules/topojson-client/src/index.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="out"></canvas>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

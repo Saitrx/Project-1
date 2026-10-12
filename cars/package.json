@@ -1,0 +1,17 @@
+{
+  "name": "what-if-cars-video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/eb-garamond": "^5.1.0",
+    "@fontsource/inter": "^5.1.0",
+    "@fontsource/jetbrains-mono": "^5.1.0",
+    "cannon-es": "^0.20.0",
+    "gsap": "^3.12.5",
+    "three": "^0.169.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
+    "ws": "^8.18.0"
+  }
+}
