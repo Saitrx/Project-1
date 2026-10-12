@@ -27,10 +27,13 @@ const args = Object.fromEntries(
 );
 
 const scale = Number(args.scale ?? 1); // 1 = 4K internal render
-const W = Math.round(2160 * scale);
-const H = Math.round(3840 * scale);
-const OUT_W = Math.round(1080 * Math.min(1, scale * 2));
-const OUT_H = Math.round(1920 * Math.min(1, scale * 2));
+// --size WxH / --out-size WxH override the default 9:16 video sizes (e.g. square images).
+const [baseW, baseH] = (args.size ?? '2160x3840').split('x').map(Number);
+const W = Math.round(baseW * scale);
+const H = Math.round(baseH * scale);
+const [outW, outH] = (args['out-size'] ?? `${baseW / 2}x${baseH / 2}`).split('x').map(Number);
+const OUT_W = Math.round(outW * Math.min(1, scale * 2));
+const OUT_H = Math.round(outH * Math.min(1, scale * 2));
 const outDir = path.resolve(ROOT, args.out ?? 'out/frames');
 fs.mkdirSync(outDir, { recursive: true });
 

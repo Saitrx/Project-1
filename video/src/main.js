@@ -15,8 +15,14 @@ window.__setup = async (W, H) => {
     document.fonts.load('500 100px PlexMono'),
   ]);
   engine = new Engine(canvas, W, H);
-  const { buildProgram } = await import('./program.js');
-  program = await buildProgram(engine);
+  if (params.get('entry') === 'pfp') {
+    await document.fonts.load('600 100px Serif4');
+    const { buildPfp } = await import('./pfp.js');
+    program = await buildPfp(engine, params.get('v') ?? 'a');
+  } else {
+    const { buildProgram } = await import('./program.js');
+    program = await buildProgram(engine);
+  }
 };
 
 // Draw exactly frame n. Everything visible is a pure function of n.
