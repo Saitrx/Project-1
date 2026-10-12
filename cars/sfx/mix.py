@@ -61,12 +61,12 @@ put(world, 'sirens', 45.0, start=3, gain=-18, lp=5000, fin=0.5, fout=0.03)
 # Eyes closed: only a calm heartbeat and the city as a far, low hum. A sleepy groan and breath as
 # the lids part (1.5 s, with the title); a soft swell carries the street in until the eyes focus
 # (~4 s). Then the head turns on the pavement and we push ourselves up (4.45-5.85 s).
-loop(world, 'city_far', 0, 5.5, xfade=2, gain=-6, fin=0.5, fout=2.0)
-loop(body, 'heart_rest', 0, 5.0, xfade=0.3, gain=-12, lp=2000, fin=0.8, fout=2.2)
-put(body, 'wake_groan', 1.15, gain=-13, lp=7000, fin=0.1, fout=0.6)
-put(body, 'wake_swell', 1.5, gain=-20, lp=6000, fin=0.6, fout=1.0, dur=2.6)
-put(body, 'head_rustle', 3.55, gain=-16, fout=0.3)
-put(body, 'stand_up', 4.5, gain=-11, fout=0.4)
+loop(world, 'city_far', 0, 5.5, xfade=2, gain=-9, fin=0.5, fout=2.0)
+loop(body, 'heart_rest', 0, 5.0, xfade=0.3, gain=-8, lp=2000, fin=0.8, fout=2.2)
+put(body, 'wake_groan', 1.2, gain=-13, lp=7000, fin=0.1, fout=0.6)
+put(body, 'wake_swell', 1.45, gain=-20, lp=6000, fin=0.3, fout=0.8)
+put(body, 'head_rustle', 2.9, gain=-16, fout=0.3)
+put(body, 'stand_up', 4.0, gain=-11, fout=0.4)
 put(world, 'pigeons', 2.15, gain=-13, pan=-0.2, fout=0.5)
 # Traffic going by (northbound lanes on our left; the hero taxi is a little lower and closer).
 for t, g, p, pitch in [(0.85, -10, -0.35, 1.0), (2.85, -13, -0.5, 1.02), (4.2, -16, -0.7, 0.97), (6.7, -5, -0.35, 0.92),
