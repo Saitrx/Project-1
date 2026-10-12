@@ -47,6 +47,7 @@ export async function buildProgram(engine, params) {
   if (want('manhole')) register('manhole', (await import('./street/shotManhole.js')).buildManholeShot(ctx, world));
   if (want('lights')) register('lights', (await import('./street/shotLights.js')).buildLightsShot(ctx, world));
   if (want('avenue')) register('avenue', (await import('./street/shotAvenue.js')).buildAvenueShot(ctx, world));
+  if (only?.includes('mascot')) register('mascot', (await import('./street/shotMascot.js')).buildMascotShot(ctx, world));
   if (want('plow')) register('plow', (await import('./street/shotPlow.js')).buildPlowShot(ctx, world));
   if (want('giant')) register('giant', (await import('./street/shotGiant.js')).buildGiantShot(ctx, world));
   if (want('aerial')) register('aerial', (await import('./shots/aerial.js')).buildAerialShot(ctx));
@@ -90,6 +91,7 @@ export async function buildProgram(engine, params) {
     const t = n / FPS;
     const shot = shotAt(t);
     if (params.has('cover')) drawCover(engine.overlayCtx, engine.W, engine.H);
+    else if (params.has('notext')) engine.overlayCtx.clearRect(0, 0, engine.W, engine.H);
     else drawOverlay(engine.overlayCtx, engine.W, engine.H, t);
     if (!shot) {
       engine.presentBlack(n);
