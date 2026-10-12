@@ -228,10 +228,9 @@ export async function build(ctx) {
     g.fillText('STOP', 128, 196);
   });
   label.redraw();
-  // The cylinder cap's UVs are rotated and flipped relative to the camera; undo both.
+  // The cylinder cap's UVs are rotated relative to the camera; turn the label upright.
   label.tex.center.set(0.5, 0.5);
   label.tex.rotation = Math.PI / 2;
-  label.tex.repeat.set(-1, 1);
   const startBtn = new THREE.Group();
   const btnBody = new THREE.Mesh(new THREE.CylinderGeometry(0.044, 0.044, 0.02, 32), [trimMat, new THREE.MeshStandardMaterial({ map: label.tex, roughness: 0.4 }), trimMat]);
   btnBody.rotation.x = Math.PI / 2;

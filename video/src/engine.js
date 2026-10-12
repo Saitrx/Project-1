@@ -177,6 +177,9 @@ export class Engine {
     const hf = { type: THREE.HalfFloatType, depthBuffer: false };
     this.sceneRT = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
     this.prevRT = new THREE.WebGLRenderTarget(W, H, hf);
+    // Bound in place of prevRT while rendering into prevRT (a texture can't be read and written at once).
+    this.blackTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
+    this.blackTex.needsUpdate = true;
     // Scene blur chain for the soft-focus effect (1/2, 1/4, 1/8 down; back up to 1/2).
     this.softDown = [2, 4, 8].map((d) => new THREE.WebGLRenderTarget(Math.round(W / d), Math.round(H / d), hf));
     this.softUp = [2, 4].map((d) => new THREE.WebGLRenderTarget(Math.round(W / d), Math.round(H / d), hf));
@@ -324,7 +327,9 @@ export class Engine {
       u.mixPrev.value = 0;
       u.useOverlay.value = 0;
       u.useDither.value = 0;
+      u.tPrev.value = this.blackTex;
       this.pass(this.finalMat, this.prevRT);
+      u.tPrev.value = this.prevRT.texture;
     }
   }
 
