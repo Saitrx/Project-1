@@ -7,7 +7,7 @@ See `STYLE_GUIDE.md` for the style breakdown taken from the reference video.
 
 ```bash
 npm install
-node audio.mjs                                   # out/audio.wav (procedural soundtrack)
+node audio.mjs                                   # out/audio.wav (ambience + sound effects, no music)
 node render.mjs --scale 1 --out out/frames       # 4K internal -> Lanczos -> 1080x1920 PNG
 ./encode.sh                                      # H.264 CRF 14, slow, film, yuv420p, faststart
 ```

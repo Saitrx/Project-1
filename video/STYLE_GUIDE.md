@@ -60,6 +60,7 @@ Reference: 61 s, 720x1280, 30 fps. Frames studied at 2 fps plus full-res close-u
   and a small CO2 subline. It changes only on cuts.
 - Captions: serif italic, white, soft shadow, about 67% height, short lines, fades.
 - Title card at the start in the reference title style. The last line uses the end-card style.
-- Sound: procedural ambient pad plus scene sound effects, no voiceover, and true digital silence for
-  the "Us." beat.
+- Sound: like the reference, no music and no voiceover. Only natural and environmental ambience
+  (wind, birds, crickets, an owl, fountain water, crowd murmur, room tone) plus scene sound effects,
+  and true digital silence for the "Us." beat.
 - Nothing copied: no logos, brand names, watermarks or channel names.
