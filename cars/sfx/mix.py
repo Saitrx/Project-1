@@ -251,13 +251,14 @@ loop(body, 'heart_slow', 61.0, 65.4, xfade=0.3, gain=-6, lp=1100, fin=0.3, fout=
 # ---- 1:05-1:07 black, two headlights come on, then the screen cracks ----------------------------------------
 HIT = 65.95  # crack.js
 place(world, hum(65.2, HIT + 0.45, base=55.0), 65.2, gain=-14, lp=1200, fin=0.5, fout=0.4)  # headlights come on
-put(world, 'tire_burst', HIT - 0.01, pitch=0.5, gain=-6, fout=0.6)  # the thump of the impact
-put(world, 'shop_glass', HIT, gain=0, fout=0.6, dur=1.8)
-put(world, 'lamp_snap', HIT, pitch=1.7, gain=-6, dur=0.5)  # the sharp crack
-put(world, 'shop_glass', HIT + 0.22, start=0.15, pitch=1.1, gain=-5, pan=-0.3, fout=0.4, dur=1.2)
-put(world, 'light_smash', HIT + 0.38, pitch=1.2, gain=-7, pan=0.35, fout=0.4, dur=1.2)
-put(world, 'glass_far', HIT + 0.4, gain=-12, fin=0.05, fout=0.6, dur=1.65)  # shards falling away
-put(body, 'tinnitus', HIT + 0.1, gain=-20, lp=7000, fin=0.2, fout=1.4, dur=2.6)
+# Just a crack, not a shatter: a soft knock, then a dry crack spreading through the glass, and two
+# smaller ones for the other impacts.
+put(world, 'tire_burst', HIT - 0.01, pitch=0.5, gain=-20, lp=400, fout=0.4)
+put(world, 'lamp_snap', HIT, pitch=1.8, gain=-13, dur=0.3, fout=0.1)
+put(world, 'asphalt_crack', HIT + 0.02, pitch=1.5, gain=-12, hp=500, dur=0.7, fout=0.3)
+put(world, 'asphalt_crack', HIT + 0.22, start=0.3, pitch=1.7, gain=-18, hp=700, pan=-0.3, dur=0.35, fout=0.15)
+put(world, 'asphalt_crack', HIT + 0.38, start=0.6, pitch=1.8, gain=-20, hp=700, pan=0.35, dur=0.3, fout=0.15)
+put(body, 'tinnitus', HIT + 0.1, gain=-24, lp=7000, fin=0.2, fout=1.4, dur=2.6)
 
 # ---- master ---------------------------------------------------------------------------------------------
 w = reverb(world.x, rt=1.1, wet=-13)
