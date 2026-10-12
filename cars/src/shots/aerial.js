@@ -61,12 +61,14 @@ export function buildAerialShot(ctx) {
   water.rotation.x = -Math.PI / 2;
   water.receiveShadow = true;
   scene.add(water);
-  world.add(polygonMesh([[-60, -80], [-3.2, -60], [-2.6, -12], [-2.4, 2], [-2.8, 12], [-60, 40]], 0.002, 0x8d9a7c)); // west shore
-  world.add(polygonMesh([[2.6, -14], [3.1, -2], [3.4, 6], [3.0, 14], [12, 30], [80, 40], [80, -80], [9, -30]], 0.002, 0x93a07f)); // east shore
-  world.add(polygonMesh([[-3, -60], [1.0, -13.2], [4, -16], [30, -80]], 0.002, 0x8f9c7a)); // north
-  const island = polygonMesh(ISLAND, 0.004, 0xb3ab9c);
+  world.add(polygonMesh([[-60, -80], [-3.2, -60], [-2.6, -12], [-2.4, 2], [-2.8, 12], [-60, 40]], 0.02, 0x8d9a7c)); // west shore
+  world.add(polygonMesh([[2.6, -14], [3.1, -2], [3.4, 6], [3.0, 14], [12, 30], [80, 40], [80, -80], [9, -30]], 0.02, 0x93a07f)); // east shore
+  world.add(polygonMesh([[-3, -60], [1.0, -13.2], [4, -16], [30, -80]], 0.02, 0x8f9c7a)); // north
+  const LAND = 0.03; // km: the island surface sits 30 m above the water
+  const island = polygonMesh(ISLAND, LAND, 0xb3ab9c);
   world.add(island);
-  const park = polygonMesh([[-0.7, -3.6], [0.4, -3.4], [0.6, -7.2], [-0.5, -7.4]], 0.006, 0x5f9a4a);
+
+  const park = polygonMesh([[-0.7, -3.6], [0.4, -3.4], [0.6, -7.2], [-0.5, -7.4]], LAND + 0.004, 0x5f9a4a);
   world.add(park);
   // Buildings: instanced boxes on the island, taller in midtown and downtown.
   const NB = 2600;
@@ -173,7 +175,7 @@ export function buildAerialShot(ctx) {
     update(t) {
       const s = carScale(t);
       const L = 4.6e-3 * s; // km
-      placeVehicle(v, 0, 0, 0, heading, s / 1000);
+      placeVehicle(v, 0, LAND, 0, heading, s / 1000);
       // Hide buildings under the car's footprint.
       const half = { w: (1.84e-3 * s) / 2 + 0.02, l: L / 2 + 0.02 };
       const rel = AXIS - heading;
@@ -182,7 +184,7 @@ export function buildAerialShot(ctx) {
         const lx = b.x * Math.cos(rel) - b.z * Math.sin(rel);
         const lz = b.x * Math.sin(rel) + b.z * Math.cos(rel);
         const crushed = Math.abs(lx) < half.w && Math.abs(lz) < half.l;
-        m4.compose(new THREE.Vector3(b.x, 0.004, b.z), new THREE.Quaternion(), crushed ? new THREE.Vector3(1e-5, 1e-5, 1e-5) : new THREE.Vector3(b.w, b.h, b.d));
+        m4.compose(new THREE.Vector3(b.x, LAND, b.z), new THREE.Quaternion(), crushed ? new THREE.Vector3(1e-5, 1e-5, 1e-5) : new THREE.Vector3(b.w, b.h, b.d));
         bmesh.setMatrixAt(i, m4);
       });
       bmesh.instanceMatrix.needsUpdate = true;
