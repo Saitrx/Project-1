@@ -1,6 +1,9 @@
 // 0:05-0:11 The illustrated Earth dissolves into its line-art twin on dark brown: cream coastlines,
-// lavender graticule with sparkle nodes, then gold "life" dots. Three in four flicker as if about to
-// go out (the species that died), then flare back and stay lit. A donut chart fills to 75%.
+// lavender graticule with sparkle nodes, then gold "life" dots. Everything follows the narration
+// ("About seventy-five percent of all species would have survived", words at 5.3-9.5 s): the dots
+// pop on during "About seventy-five", the donut fills to 75% as he says "seventy-five percent", a
+// glow wave runs over all the dots on "all species", three in four then dim as if about to go out
+// (the species that died) and flare back gold on "survived".
 import { canvas, strokePartial, sparkle, rgba, smoothPath } from '../kit/paint.js';
 import { makeRng, clamp, lerp, smoothstep, easeOutBack, easeInOut, TAU } from '../kit/util.js';
 import { setCam } from '../kit/cam.js';
@@ -54,14 +57,16 @@ export async function build(env) {
     if (dots.some((d) => Math.hypot(d.x - p[0], d.y - p[1]) < 15)) continue;
     dots.push({ x: p[0], y: p[1], depth: p[2], land: onLand, t: 0, doomed: false, r: rng.range(2.6, 4.4) });
   }
-  // Appearance order: a sweep from the upper left, with jitter.
-  dots.forEach((d) => (d.t = 5.75 + ((d.x - 100 + (d.y - 500) * 0.6) / 1000) * 1.5 + rng.range(-0.12, 0.12)));
+  // Appearance order: a quick sweep from the upper left, with jitter (5.3-6.4 s).
+  const sweep = (d) => clamp((d.x - 150 + (d.y - 540) * 0.6) / 1250);
+  dots.forEach((d) => (d.t = 5.3 + sweep(d) * 0.95 + rng.range(-0.08, 0.08)));
+  dots.forEach((d) => (d.wave = 6.95 + sweep(d) * 0.7)); // the "all species" glow wave
   dots.forEach((d) => (d.doomed = rng.chance(0.75)));
   dots.forEach((d) => (d.flick = rng.range(0, 0.5)));
   // The dot the forest opens from: a land dot in Central America.
   const focusP = projectPoint(-84, 12, cx, cy, R);
   const focus = { x: focusP[0], y: focusP[1] };
-  dots.push({ x: focus.x, y: focus.y, depth: 1, land: true, t: 6.05, doomed: false, flick: 0, r: 4.4 });
+  dots.push({ x: focus.x, y: focus.y, depth: 1, land: true, t: 5.6, wave: 7.15, doomed: false, flick: 0, r: 4.4 });
   // Coast draw order: longest first so continents read early.
   const coastLen = coast.map((r) => r.length);
 
@@ -127,16 +132,20 @@ export async function build(env) {
     for (const d of dots) {
       const a = clamp((t - d.t) / 0.25);
       if (a <= 0) continue;
-      let r = d.r * easeOutBack(a, 2.2);
+      // the "all species" wave: a soft swell of light passing over every dot
+      const wv = Math.max(0, 1 - Math.abs(t - d.wave) / 0.2);
+      const pulse = wv * wv * (3 - 2 * wv);
+      let r = d.r * easeOutBack(a, 2.2) * (1 + pulse * 0.35);
       let col = GOLD;
-      let glow = 0.5;
+      let glow = 0.5 + pulse * 0.6;
       if (d.doomed) {
-        // flicker toward a dim red, then flare back gold and stay lit
-        const dim = smoothstep(7.25 + d.flick * 0.4, 7.7 + d.flick * 0.4, t) * (1 - smoothstep(8.25 + d.flick * 0.3, 8.6 + d.flick * 0.3, t));
+        // flicker toward a dim red ("would have"), then flare back gold on "survived" and stay lit
+        const back0 = 8.55 + d.flick * 0.16;
+        const dim = smoothstep(7.7 + d.flick * 0.3, 8.05 + d.flick * 0.3, t) * (1 - smoothstep(back0, back0 + 0.25, t));
         const fl = dim * (0.6 + 0.4 * Math.sin(t * 38 + d.x));
         col = `rgb(${lerp(232, 120, fl) | 0},${lerp(176, 46, fl) | 0},${lerp(74, 40, fl) | 0})`;
-        glow = 0.5 * (1 - fl);
-        const flare = smoothstep(8.25 + d.flick * 0.3, 8.6 + d.flick * 0.3, t) * (1 - smoothstep(8.7 + d.flick * 0.3, 9.4 + d.flick * 0.3, t));
+        glow *= 1 - fl;
+        const flare = smoothstep(back0, back0 + 0.25, t) * (1 - smoothstep(back0 + 0.4, back0 + 1.1, t));
         r *= 1 + flare * 0.6;
         glow += flare * 0.9;
         if (flare > 0) {
@@ -161,13 +170,14 @@ export async function build(env) {
       g.arc(d.x - r * 0.3, d.y - r * 0.32, r * 0.3, 0, TAU);
       g.fill();
     }
-    // donut chart: 75%
-    const dc = smoothstep(7.7, 8.0, t);
+    // donut chart: fills to 75% while he says "seventy-five percent" (5.76-6.88 s), glows on "survived"
+    const dc = smoothstep(5.5, 5.75, t);
     if (dc > 0) {
       const ox = 228;
       const oy = 330;
       const rr = 96;
-      const fill = easeInOut(clamp((t - 7.9) / 1.0)) * 0.75;
+      const fill = easeInOut(clamp((t - 5.72) / 0.85)) * 0.75;
+      const glowArc = smoothstep(8.6, 8.8, t) * (1 - smoothstep(9.0, 9.7, t));
       g.globalAlpha = dc;
       g.strokeStyle = rgba(CREAM, 0.5);
       g.lineWidth = 1;
@@ -175,6 +185,14 @@ export async function build(env) {
       g.arc(ox, oy, rr + 16, 0, TAU);
       g.arc(ox, oy, rr - 16, 0, TAU, true);
       g.stroke();
+      if (glowArc > 0) {
+        g.strokeStyle = rgba('#ffe0a0', 0.35 * glowArc);
+        g.lineWidth = 30 + 22 * glowArc;
+        g.lineCap = 'butt';
+        g.beginPath();
+        g.arc(ox, oy, rr, -Math.PI / 2, -Math.PI / 2 + TAU * fill);
+        g.stroke();
+      }
       g.strokeStyle = GOLD;
       g.lineWidth = 30;
       g.lineCap = 'butt';
