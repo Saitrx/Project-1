@@ -1,0 +1,5 @@
+node_modules/
+out/
+ref/*.png
+!ref/compare_*.png
+*.wav

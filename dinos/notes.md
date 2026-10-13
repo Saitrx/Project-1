@@ -1,0 +1,148 @@
+# What if dinosaurs still existed today? Style notes
+
+## Reference breakdown
+
+The reference (`reference.mp4`, 720x720, 24 fps, 53 s) is an illustrated, code-drawn animation of a honey
+bee's life. I studied frames at 2 per second, close-ups of single frames, and frame strips across the
+transitions (kept locally in `ref/`; the PNGs are not committed).
+
+### Drawing style and line work
+- Flat colour shapes with soft two-tone shading. Most shapes have a thin outline in warm dark brown
+  (about `#2e2219`), never pure black. Line weight is even, about 1/400 of the frame.
+- Shading is drawn rather than airbrushed:
+  - groups of parallel hatch lines, about 0.5 px, in a darker tone of the base at 20-40% opacity;
+  - cross-hatching on the darkest side;
+  - loose "scribble" clusters of straight strokes scattered over large surfaces.
+- Fur is thousands of individual thin strokes, dark at the root and light ochre at the tip. They
+  radiate from the body with small random angle jitter, and the silhouette edge is ragged with hairs.
+  Legs are dark segments with tiny bristles.
+- Wings and membranes are transparent grey with thin vein lines.
+- Highlights on glossy round things (eyes, honey, dew) are a thin white arc plus one small white dot.
+
+### Textures
+- Paper grain over everything: fine speckle, plus faint, larger blotchy tone variation.
+- Surfaces carry stipple dots, tiny specks of lighter and darker tone (pollen, wax), and soft
+  concentric rings in the pollen cells.
+- The night scene and the tree bark are covered with dense short scratch strokes (wood grain).
+
+### Colour palette
+- **Warm hive:** honey amber `#e7bf60`, wax cream `#efe1c4`, ochre and brown wall shading
+  `#c2a582` / `#8a5a2b`, bee brown `#6c4b24`.
+- **Outdoor:**
+  - pale sky blue `#a9cfe0` fading to near-white at the horizon;
+  - sage and meadow greens `#c2d588` / `#bccd9a`;
+  - leaf green `#628d46`;
+  - accents of blossom white-pink and crimson buds.
+- **Diagrams:**
+  - near-black warm brown background `#180f0b`;
+  - cream line art `#f1e3c2`;
+  - thin lavender-blue construction lines `#8e8fd6` with tiny 4-point sparkles at the nodes;
+  - gold dots `#e8b04a`;
+  - occasional magenta or green tint inside a line-art form.
+- **Measurement overlays** on top of illustrations: a red line `#d8463d` with tick marks, dashed
+  segments, an angle arc and a sun icon.
+- **Night:** indigo `#262759` with dense lighter scratches.
+
+### Diagrams and insets
+- Diagrams are "technical drawings":
+  - cream outlines on dark brown;
+  - hex grids and dot fills inside a form;
+  - wireframe or contour-line versions of the animals;
+  - a small tree diagram in the corner, built up branch by branch.
+- Lines draw on progressively, like a compass. A point travels and leaves the circle behind it, then
+  the construction lines and nodes appear one after another.
+- Circular insets are a cream disc with a thin dark outline holding a line-art cross-section (the
+  flower anatomy). They sit in the upper part of the frame while the scene keeps moving underneath.
+- Staged diagrams (larva to pupa to bee) show the current stage bright and the earlier and later
+  stages as dim ghosts beside it.
+
+### Camera moves
+- Mostly locked or very slow:
+  - slow pans along a branch;
+  - gentle push-ins on a cell;
+  - a little parallax between foreground blossoms, the branch and the far horizon.
+- A few hard top-down map shots (the meadow) with drawn overlays.
+- Zooms are smooth ease-in-out; nothing is handheld.
+
+### Transitions and pacing
+- **Illustration to line art:** a colour illustration dissolves into its own line-art or wireframe
+  version on the dark background (the bee becomes a wire drawing, then the diagram takes over).
+- **Shape continuity:** circle to circle, so the egg, the flower inset and the sun hold the same
+  place on screen. A cell zoom becomes the next scene.
+- Objects pop in with small staggered delays (dots, flowers, stages), each with a short ease-out
+  scale.
+- A new idea comes every 3-6 seconds, and each shot holds long enough to read.
+- Animals move continuously: wing shimmer, antennae, leg steps, bobbing flight. Nothing is frozen.
+
+### Text
+The reference has no captions. Its signature text at the very end is not used here.
+
+## Adaptation for this video (9:16, 1080x1920 at 30 fps, rendered at 2160x3840)
+- Same layer recipe, drawn by code with seeded random numbers:
+  - flat fills;
+  - warm-brown outlines;
+  - hatch and cross-hatch shading clipped to each shape;
+  - stipple;
+  - fur or feather strokes;
+  - white arc highlights;
+  - paper grain on top.
+- Every textured element is drawn once into an offscreen canvas at the resolution it is shown at, so
+  its texture never changes between frames. Animation moves and bends these drawings (cut-out
+  puppet joints), so nothing boils.
+- The diagram scenes (the life dots, the fossil inset frame, the weight and bite diagrams, the
+  skeletons) use the dark-brown and cream technical style with lavender construction lines, draw-on
+  lines and sparkle nodes.
+- Measurement overlays (wingspan) use the reference's red dashed line with tick marks.
+- Transitions:
+  - the asteroid shot's Earth dissolves into its line-art twin;
+  - a life dot opens into the forest;
+  - the circular fossil inset grows from the hiding mammal;
+  - the inset shrinks to a sun-like disc over the city;
+  - the T. rex dissolves into its line-art skeleton, which morphs into the chicken skeleton;
+  - the chicken's line art dissolves into the pigeon on the sidewalk.
+- People are simple illustrated figures. Women wear long skirts or loose clothing with their hair
+  visible.
+
+## Narrator
+- **Chosen voice:** Alec – Nature Documentary Narrator. `voice_id`: `Ovio1nb5Thj5cZeW3MPS`.
+  - From the ElevenLabs voice library: a calm, warm, cinematic nature-documentary narrator, male,
+    middle-aged. It is not a clone of any real person.
+  - Of the candidates found by searching "documentary narrator" (Alec, Atlas, Cedric, Max), it had
+    the deepest pitch (median F0 about 105 Hz in its preview).
+- **Model:** `eleven_v4`, the newest and highest-quality text-to-speech model offered on the account.
+  The output format is fixed at mp3 44.1 kHz 128 kbps; it is resampled to 48 kHz in the mix.
+- **How it was generated:**
+  - Through the ElevenLabs connector, because no `ELEVENLABS_API_KEY` was set in this environment.
+    The connector does not expose `previous_text` / `next_text` or the with-timestamps alignment.
+  - One request per line, with numbers spelled out ("sixty-six million", "seventy-five percent",
+    "ten-meter", "eight times", "ten thousand") and "T-rex".
+  - Line timing comes from analysing the audio instead (`audio/vo_prep.py`): speech onset, pauses and
+    sentence breaks.
+- **Fitting each line to its scene:**
+  - Each line starts 0.3 s into its scene; the first line starts at 0.2 s.
+  - Over-long pauses between sentences were tightened.
+  - Lines 1, 4 and 10 were sped up slightly (atempo 1.11x, 1.12x and 1.05x, pitch unchanged), so
+    every line ends before its scene does. No words were cut.
+- **Captions:** each caption fades in when its sentence starts; the times are in
+  `src/vo_timing.js`.
+
+## Audio
+- There is no music in either version.
+- **Sound effects:**
+  - Generated with ElevenLabs sound generation (`eleven_text_to_sound_v2`, prompt influence 0.5,
+    loop on for the ambience beds) and saved in `sfx/`, so re-renders reuse them.
+  - The important sounds got 2 takes each. I picked by waveform and loudness:
+    - asteroid whoosh: take a (clean single swell);
+    - footstep: b (fuller thud);
+    - city call: b (take a clipped);
+    - wing flaps: a (three distinct beats);
+    - T. rex growl: b (lower noise floor);
+    - pigeon coo: a (cleaner, more headroom).
+- **Narration:** saved in `vo/`.
+- **Mix** (`audio/mix.py`):
+  - Ambience beds crossfade about 0.5 s between scenes, and spot effects sit on the on-screen events.
+  - In the voiceover version the beds duck 8 dB and the spot effects 6 dB under the voice. The
+    footstep, the city call and the growl duck only 3 dB, so they poke through in the gaps.
+  - The voice gets a gentle 80 Hz high-pass and light compression; there is no reverb.
+  - Both mixes are normalised to -14 LUFS with true peak below -1 dBTP, 48 kHz stereo, and fade to
+    silence over the last half second.

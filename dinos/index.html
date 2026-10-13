@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>What if dinosaurs still existed today?</title>
+  <style>
+    @font-face { font-family: "EBGaramond"; font-style: normal; font-weight: 500; src: url(node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-500-normal.woff2) format("woff2"); }
+    @font-face { font-family: "EBGaramond"; font-style: normal; font-weight: 600; src: url(node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-600-normal.woff2) format("woff2"); }
+    @font-face { font-family: "EBGaramond"; font-style: italic; font-weight: 500; src: url(node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-500-italic.woff2) format("woff2"); }
+    html, body { margin: 0; background: #000; }
+    canvas { display: block; width: 540px; height: 960px; }
+  </style>
+  <script type="importmap">
+    { "imports": { "topojson-client": "./node_modules/topojson-client/src/index.js", "d3-geo": "./node_modules/d3-geo/src/index.js", "d3-array": "./node_modules/d3-array/src/index.js", "internmap": "./node_modules/internmap/src/index.js" } }
+  </script>
+</head>
+<body>
+  <canvas id="out"></canvas>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
