@@ -13,7 +13,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from engine import SR, Bus, put, loop, db, lowpass, highpass  # noqa: E402
+from engine import SR, Bus, put, loop, load, shape, db, lowpass, highpass  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LEN = 60.0
@@ -23,9 +23,8 @@ TARGET = -12.0  # integrated loudness (LUFS) of both mixes
 
 # Deep sounds get extra harmonics so phone speakers (which can't play sub-bass) still carry them.
 DEEP = {
-    'space_rumble': dict(drive=12, wet=6, out_hp=220),
+    'space_rumble': dict(drive=2.5, wet=-10, out_hp=150),  # only a faint trace, so it stays clean
     'farm_amb': dict(drive=6, wet=-2),
-    'asteroid_whoosh_a': dict(drive=12, wet=6, out_hp=230),
     'dino_footstep_b': dict(drive=8, wet=12, lo=20, out_hp=250),
     'dino_call_b': dict(drive=10, wet=4),
     'wing_flaps_a': dict(drive=10, wet=5),
@@ -50,8 +49,28 @@ def L(bus, name, t0, t1, **kw):
     loop(bus, name, t0, t1, **kw)
 
 
+def stretch(x, factor):
+    """Time-stretch a stereo clip by `factor` with the pitch unchanged (ffmpeg rubberband)."""
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', '-af', f'rubberband=tempo={1 / factor:.4f}', '-f', 'f32le', '-'],
+                         input=x.astype(np.float32).tobytes(), capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32).reshape(-1, 2).astype(np.float64)
+
+
+def meteor():
+    """The single meteor sound: the meteor2_b fly-by with its 1.2 s build stretched 3x, so it is
+    heard coming from far away and peaks 3.6 s in. The sub-bass below 45 Hz is cut and the 150-700 Hz
+    body lifted about 5 dB (a clean, linear EQ, no saturation) so phone speakers carry it."""
+    x = load('meteor2_b')
+    k, f = int(1.2 * SR), int(0.1 * SR)
+    head = stretch(x[:k + f], 3.0)[: int(3.0 * k) + f]
+    a = np.sin(np.linspace(0, np.pi / 2, f))[:, None]
+    x = np.concatenate([head[:-f], head[-f:] * a[::-1] + x[k:k + f] * a, x[k + f:]])
+    x = highpass(x, 45)
+    return x + highpass(lowpass(x, 700), 150) * (db(5) - 1)
+
+
 def beds(b):
-    L(b, 'space_rumble', 0.0, 5.3, gain=-2, fin=0.4, fout=0.5)
+    L(b, 'space_rumble', 0.0, 5.3, gain=-5, fin=0.4, fout=0.6, auto=[(0.0, -6), (3.6, 0)])
     L(b, 'room_tone', 4.8, 11.3, gain=-4, fin=0.5, fout=0.5)
     L(b, 'forest_amb', 10.6, 17.3, gain=1, fin=0.7, fout=0.3)
     L(b, 'forest_amb', 17.0, 23.3, gain=-5, fin=0.3, fout=0.6, start=2.0)
@@ -64,12 +83,11 @@ def beds(b):
 
 
 def spots(b, big):
-    # 0:00 the meteor: deep fly-by plus a fiery rush that travels right to left as it skims past
-    P(big, 'asteroid_whoosh_a', 2.35, gain=2, fout=0.4, pan_auto=[(2.4, 0.5), (4.6, -0.6)])
-    P(b, 'meteor_fire', 0.35, dur=2.2, gain=-4, fin=1.6, fout=0.5, auto=[(0.35, -9), (2.3, 0)], pan=0.6)
-    P(big, 'meteor_fire', 2.2, gain=0, fin=0.6, fout=0.6, pan_auto=[(2.2, 0.6), (4.8, -0.7)])
-    # 0:05 line-art: paper rustle, ticks as the life dots light up, a bright flare
-    P(b, 'paper_rustle', 4.85, gain=-3)
+    # 0:00 the meteor: one clean fly-by that grows as it approaches, peaks as it skims past Earth
+    # (~4.2 s) and travels right to left with it; under it only the soft space rumble
+    b.add(shape(meteor(), 0.6, gain=0, fin=0.3, fout=0.8, pan_auto=[(2.4, 0.45), (3.85, 0.05), (4.95, -0.5)]), 0.6)
+    # 0:05 line-art: a soft zoom as Earth turns into its drawing, ticks as the life dots light up
+    P(b, 'zoom_b', 4.58, gain=-3, hp=70)
     rng = np.random.default_rng(11)
     for t in np.linspace(5.85, 7.35, 18):
         P(b, 'soft_tick', t + rng.uniform(-0.04, 0.04), gain=-7 - rng.uniform(0, 4), pitch=rng.uniform(0.9, 1.2), pan=rng.uniform(-0.5, 0.5))
@@ -77,8 +95,7 @@ def spots(b, big):
         P(b, 'soft_tick', t, gain=-9, pitch=1.3, pan=rng.uniform(-0.4, 0.4))
     for k, t in enumerate(np.arange(8.75, 10.4, 0.23)):
         P(b, 'soft_tick', t + rng.uniform(-0.05, 0.05), gain=-12 - (k % 3) * 2, pitch=rng.uniform(1.2, 1.5), pan=rng.uniform(-0.6, 0.6))
-    P(b, 'paper_rustle', 9.4, start=0.5, gain=-7, pitch=0.9)
-    P(b, 'swoosh', 10.45, gain=-4)  # the circle opens into the forest
+    P(b, 'zoom_b', 10.2, gain=-3, hp=70, pitch=0.92)  # push into the dot; the circle opens into the forest
     # 0:11 forest: the foot comes down (air), smashes the ground (thud + crunch + leaves), lifts away
     P(b, 'swoosh', 12.75, gain=-3, pitch=0.62)
     P(big, 'dino_footstep_b', 13.48, gain=3, fout=0.6, hp=45)

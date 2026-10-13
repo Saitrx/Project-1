@@ -132,7 +132,8 @@ The reference has no captions. Its signature text at the very end is not used he
   - Generated with ElevenLabs sound generation (`eleven_text_to_sound_v2`, prompt influence 0.5,
     loop on for the ambience beds) and saved in `sfx/`, so re-renders reuse them.
   - The important sounds got 2 takes each. I picked by waveform and loudness:
-    - asteroid whoosh: take a (clean single swell);
+    - meteor fly-by: `meteor2_b` (the smoother of the two, one clean build and fade);
+    - zoom whoosh: `zoom_b` (smoother, no rough edges);
     - footstep: b (fuller thud);
     - city call: b (take a clipped);
     - wing flaps: a (three distinct beats);
@@ -152,6 +153,18 @@ The reference has no captions. Its signature text at the very end is not used he
     phones reproduce them.
   - Five more ElevenLabs layers: a fiery meteor rush, a ground-smash crunch, shaking leaves, a soft
     swoosh for transitions and a mid-range T. rex snarl.
-  - Extra cues so every moment has sound: the meteor approaching from the start, twinkling dots,
-    the foot coming down and lifting, inset and transition swooshes, the sauropod's exhale, the
-    Triceratops and T. rex breathing, clicks as the skeleton draws in, and the pigeon's steps.
+  - Extra cues so every moment has sound: twinkling dots, the foot coming down and lifting, inset
+    and transition swooshes, the sauropod's exhale, the Triceratops and T. rex breathing, clicks as
+    the skeleton draws in, and the pigeon's steps.
+- **Meteor and transition pass**, after feedback that the meteor sounded unrealistic and too loud,
+  and that the paper sound didn't fit:
+  - The meteor is now one sound. The fly-by `meteor2_b` replaces the earlier three layers (deep
+    whoosh plus two fiery rushes). Its saturated harmonics are gone too; they had made it fuzzy.
+  - Its build is stretched 3x with the pitch kept, so it is heard coming from far away (from about
+    1.5 s) and peaks as it skims past Earth at about 4.2 s. It pans right to left with the meteor.
+  - It gets only a clean EQ: below 45 Hz cut and the 150-700 Hz body lifted about 5 dB, so phones
+    still carry it. It sits about 6 dB lower than before, at an ordinary effect level.
+  - The space rumble under it is soft and clean.
+  - The paper rustles are replaced by a soft, warm zoom whoosh (`zoom_b`):
+    - one where Earth turns into its line-art drawing;
+    - one, slightly deeper, for the push into the life dot as the circle opens onto the forest.
