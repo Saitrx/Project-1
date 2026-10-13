@@ -179,6 +179,20 @@ The reference has no captions. Its signature text at the very end is not used he
   - The paper rustles are replaced by a soft, warm zoom whoosh (`zoom_b`):
     - one where Earth turns into its line-art drawing;
     - one, slightly deeper, for the push into the life dot as the circle opens onto the forest.
+- **Voice-first pass (voiceover version)**, after TikTok's Quality Advisor flagged background noise
+  and feedback that some moments were too loud and the sound felt like a separate background track:
+  - Under the narration, the beds and effects were only 5-11 dB below the voice in the speech band
+    on five of the ten lines (worst: the T. rex growl and the wing beats).
+  - They are now ducked 15-18 dB above 150 Hz and 6 dB below it. A rider also keeps the speech band
+    at least 17 dB under the voice while he speaks (the deep lows get half of that). Every line is
+    now 15.5-30 dB clear.
+  - A second rider keeps every effect at least 3 dB under the voice level, also between lines. That
+    removed the spike of the sauropod's call at 27-29 s (momentary -5.5 down to about -11 LUFS).
+  - The narration lines came from separate requests and differed by up to 4 dB. Each one is now
+    levelled to the same loudness.
+  - The ambience beds sit 4 dB lower. The room tone under the globe and skeleton diagrams is gone,
+    because nothing on screen makes it.
+  - The sound-effects-only version is unchanged.
 - **Globe sounds**, after feedback that the dot sounds were annoying: about 30 quick ticks for the
   dots and the 75% chart were replaced with three gentle sounds (new ElevenLabs effects, 2 takes
   each):

@@ -19,6 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LEN = 60.0
 GLOW = [50.95, 51.4, 51.85, 52.25, 52.65, 53.05]  # matching bones light up (s09_skeleton.js)
 TARGET = -12.0  # integrated loudness (LUFS) of both mixes
+LINE_LUFS = -31.5  # each narration line is levelled to this before the voice processing
 
 
 # Deep sounds get extra harmonics so phone speakers (which can't play sub-bass) still carry them.
@@ -69,16 +70,20 @@ def meteor():
     return x + highpass(lowpass(x, 700), 150) * (db(5) - 1)
 
 
-def beds(b):
+def beds(b, room=True):
+    # room=False leaves out the room tone under the two diagram scenes (globe, skeletons): nothing on
+    # screen makes it, so the voiceover version keeps those scenes quiet apart from their own sounds
     L(b, 'space_rumble', 0.0, 5.3, gain=-5, fin=0.4, fout=0.6, auto=[(0.0, -6), (3.6, 0)])
-    L(b, 'room_tone', 4.8, 11.3, gain=-4, fin=0.5, fout=0.5)
+    if room:
+        L(b, 'room_tone', 4.8, 11.3, gain=-4, fin=0.5, fout=0.5)
     L(b, 'forest_amb', 10.6, 17.3, gain=1, fin=0.7, fout=0.3)
     L(b, 'forest_amb', 17.0, 23.3, gain=-5, fin=0.3, fout=0.6, start=2.0)
     L(b, 'city_traffic', 22.8, 30.3, gain=0, fin=0.6, fout=0.5)
     L(b, 'airport_amb', 29.8, 36.3, gain=-2, fin=0.5, fout=0.5)
     L(b, 'farm_amb', 35.8, 42.3, gain=-3, fin=0.5, fout=0.5)
     L(b, 'farm_amb', 41.8, 48.4, gain=-7, fin=0.5, fout=0.6, start=3.0)
-    L(b, 'room_tone', 47.9, 54.3, gain=-3, fin=0.6, fout=0.5)
+    if room:
+        L(b, 'room_tone', 47.9, 54.3, gain=-3, fin=0.6, fout=0.5)
     L(b, 'sidewalk_amb', 53.8, 60.0, gain=-2, fin=0.6, fout=0.05)
 
 
@@ -231,8 +236,10 @@ def voice_track():
     timing = json.load(open(os.path.join(ROOT, 'out/vo/timing.json')))
     v = np.zeros(int(LEN * SR))
     for line in timing:
-        raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', os.path.join(ROOT, 'out/vo', f"line{line['line']:02d}.wav"), '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+        path = os.path.join(ROOT, 'out/vo', f"line{line['line']:02d}.wav")
+        raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
         y = np.frombuffer(raw, np.float32).astype(np.float64)
+        y = y * db(LINE_LUFS - lufs(path)[0])  # every line equally loud (they came from separate requests)
         i = int(line['start'] * SR)
         v[i:i + len(y)] += y[: len(v) - i]
     # light high-pass around 80 Hz and gentle compression; no reverb
@@ -265,6 +272,60 @@ def duck_curve(v, depth_db):
     return np.interp(np.arange(len(v)), np.arange(n) * w + w / 2, g)
 
 
+# Voiceover version: the narration leads. Under it, beds and effects are ducked hard above XOVER
+# but only gently in the deep lows, so impacts keep their weight without covering the words. Two
+# riders follow: one keeps the speech band clear while he speaks, one keeps every effect below the
+# voice, also between lines.
+XOVER = 150            # Hz
+VOICE_LEVEL = db(-17)  # RMS of the narration while speaking
+VO_BED_GAIN = -4.0     # ambience beds sit lower in the voiceover version
+DUCK = {'bed': (6.0, 18.0), 'fx': (6.0, 15.0), 'big': (6.0, 15.0)}  # dB: (below XOVER, above)
+CEILING = -3.0         # effects stay this far under the voice level (400 ms RMS, above 120 Hz)
+CLEAR = -17.0          # while he speaks, effects in the speech band stay this far under the voice
+
+
+def ceiling(x, ref):
+    """Turn x down wherever its 400 ms loudness (lows ignored) would rise above ref (linear RMS)."""
+    e, w = rms400(highpass(x, 120).mean(1))
+    want = np.minimum(1.0, ref / (e + 1e-12))
+    g = np.empty(len(want))
+    s, a_dn, a_up = 1.0, 1 - np.exp(-1 / 3), 1 - np.exp(-1 / 40)  # ~30 ms down, ~400 ms back up
+    for i in range(len(want)):
+        s += (want[i] - s) * (a_dn if want[i] < s else a_up)
+        g[i] = s
+    return x * np.interp(np.arange(len(x)), np.arange(len(g)) * w + w / 2, g)[:, None]
+
+
+def rms400(x):
+    """400 ms RMS of a mono signal every 10 ms (centred windows)."""
+    w = SR // 100
+    n = len(x) // w
+    return np.sqrt(np.convolve((x[: n * w].reshape(n, w) ** 2).mean(1), np.ones(40) / 40, 'same')), w
+
+
+def vo_under(bed, fx, big, v):
+    """Beds and effects for the voiceover version, ducked under the narration v (mono)."""
+    lo_sum, hi_sum = 0, 0
+    for x, (lo_db, hi_db), gain in ((bed, DUCK['bed'], VO_BED_GAIN), (fx, DUCK['fx'], 0.0), (big, DUCK['big'], 0.0)):
+        lo = lowpass(x, XOVER)
+        lo_sum = lo_sum + lo * duck_curve(v, lo_db)[:, None] * db(gain)
+        hi_sum = hi_sum + (x - lo) * duck_curve(v, hi_db)[:, None] * db(gain)
+    # keep the words clear: in the speech band the effects stay CLEAR dB under the voice while he speaks
+    speech = lambda y: lowpass(highpass(y[:, None], 200), 5000)[:, 0]
+    ev, w = rms400(speech(v / (np.sqrt((v[np.abs(v) > 1e-4] ** 2).mean()) + 1e-9) * VOICE_LEVEL))
+    eu, _ = rms400(speech((lo_sum + hi_sum).mean(1)))
+    want = np.where(ev > VOICE_LEVEL * db(-20), np.minimum(1.0, ev * db(CLEAR) / (eu + 1e-12)), 1.0)
+    g = np.empty(len(want))
+    s, a_dn, a_up = 1.0, 1 - np.exp(-1 / 3), 1 - np.exp(-1 / 30)
+    for i in range(len(want)):
+        s += (want[i] - s) * (a_dn if want[i] < s else a_up)
+        g[i] = s
+    # (the deep lows get half the reduction in dB, so impacts like the stomp keep their weight)
+    gs = np.interp(np.arange(len(hi_sum)), np.arange(len(g)) * w + w / 2, g)[:, None]
+    under = lo_sum * np.sqrt(gs) + hi_sum * gs
+    return ceiling(under, VOICE_LEVEL * db(CEILING))
+
+
 def main():
     os.makedirs(os.path.join(ROOT, 'out'), exist_ok=True)
     bed = Bus(LEN)
@@ -276,13 +337,10 @@ def main():
     master(sfx.copy(), os.path.join(ROOT, 'out/sfx_mix.wav'))
 
     v, timing = voice_track()
-    duck_beds = duck_curve(v, 8.0)
-    duck_fx = duck_curve(v, 7.0)
-    duck_big = duck_curve(v, 7.0)
-    under = bed.x * duck_beds[:, None] + fx.x * duck_fx[:, None] + big.x * duck_big[:, None]
-    # voice level: sit the narration clearly on top (about 9 dB above the ducked effects)
-    vi = v / (np.sqrt((v[np.abs(v) > 1e-4] ** 2).mean()) + 1e-9) * db(-17)
-    mix = under + np.stack([vi, vi], 1)
+    vi = v / (np.sqrt((v[np.abs(v) > 1e-4] ** 2).mean()) + 1e-9) * VOICE_LEVEL
+    bed_vo = Bus(LEN)
+    beds(bed_vo, room=False)
+    mix = vo_under(bed_vo.x, fx.x, big.x, v) + np.stack([vi, vi], 1)
     master(mix, os.path.join(ROOT, 'out/vo_mix.wav'))
 
 
