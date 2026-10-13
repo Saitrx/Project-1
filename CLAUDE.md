@@ -9,6 +9,6 @@
   `dinos/final/dinosaurs_sfx.mp4` and `dinos/final/dinosaurs_voiceover.mp4` (each under 99 MB).
   ElevenLabs sounds and narration are saved in `dinos/sfx/` and `dinos/vo/`; reuse them instead of
   generating again.
-- TikTok re-encodes uploads and has served the 80-90 MB files at only 540p; a 50 MB, ~5.6 Mbps
-  upload got 720p. So also keep TikTok upload files under 50 MB (~6 Mbps, H.264 High 4.1, AAC
-  192k): `dinos/final/*_tiktok.mp4`, rendered with `?nospeckle` (see `dinos/encode_tiktok.sh`).
+- The user uploads the dinosaur voiceover video to TikTok, so `dinos/final/dinosaurs_voiceover.mp4`
+  follows their TikTok spec: under 72 MB, 1080x1920, H.264 at the highest bitrate that fits (about
+  9 Mbps for 60 s), AAC 256 kbps stereo. It's rendered with `?nospeckle`; see `dinos/encode_tiktok.sh`.

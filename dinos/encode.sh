@@ -1,11 +1,11 @@
 #!/bin/bash
-# Encode the rendered 1080x1920 lossless PNG frames (out/frames) into the two deliverables, which
-# share one video encode and differ only in audio:
+# Encode the rendered 1080x1920 lossless PNG frames (out/frames) into
 #   final/dinosaurs_sfx.mp4         sound effects only (out/sfx_mix.wav)
-#   final/dinosaurs_voiceover.mp4   sound effects + narrator (out/vo_mix.wav)
+# The voiceover version (final/dinosaurs_voiceover.mp4) is made for TikTok upload by
+# encode_tiktok.sh instead: under 72 MB, from frames rendered without the fine paper speckle.
 # Video: two-pass H.264 High, veryslow, tune animation, yuv420p, ~11,500 kbps (maxrate 13.5M,
-# bufsize 27M). Audio: AAC 256 kbps, 48 kHz stereo. faststart. Each file must stay under 99 MB;
-# the video bitrate steps down until both fit.
+# bufsize 27M). Audio: AAC 256 kbps, 48 kHz stereo. faststart. The file must stay under 99 MB;
+# the video bitrate steps down until it fits.
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p final
@@ -19,9 +19,8 @@ while :; do
   ffmpeg -v error -y "${common[@]}" -pass 1 -an -f mp4 /dev/null
   ffmpeg -v error -y "${common[@]}" -pass 2 -an out/video.mp4
   ok=1
-  for v in sfx voiceover; do
+  for v in sfx; do
     a=out/sfx_mix.wav
-    [ "$v" = voiceover ] && a=out/vo_mix.wav
     ffmpeg -v error -y -i out/video.mp4 -i "$a" -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k -ar 48000 -ac 2 \
       -t 60 -movflags +faststart "final/dinosaurs_$v.mp4"
     size=$(stat -c %s "final/dinosaurs_$v.mp4")

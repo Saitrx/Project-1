@@ -7,16 +7,16 @@ bee animation) are in [notes.md](notes.md).
 ## Output
 
 - `final/dinosaurs_sfx.mp4`: ambience and sound effects only.
-- `final/dinosaurs_voiceover.mp4`: the same sound effects plus the narrator.
-- `final/dinosaurs_sfx_tiktok.mp4` / `final/dinosaurs_voiceover_tiktok.mp4`: the files to upload to
-  TikTok. They are under 50 MB (about 6 Mbps) and rendered without the fine paper speckle, so
-  TikTok's own re-encode keeps more of the drawing (see `encode_tiktok.sh`).
+- `final/dinosaurs_voiceover.mp4`: the same sound effects plus the narrator. This is the TikTok upload
+  file, so it is under 72 MB and rendered without the fine paper speckle (see below).
 - `final/cover.png` / `final/cover.jpg`: the TikTok cover (1080x1920). It's the city shot at 25.3 s,
   zoomed 1.25x, with the title "What if dinosaurs never died?". The suggested caption is in
   `final/caption.txt`.
 
 Both files have:
-- **Video:** two-pass H.264 High, `veryslow`, `tune animation`, about 11.5 Mbps.
+- **Video:** two-pass H.264 High, `veryslow`, `tune animation`, 1080x1920, 30 fps.
+  - The sound-effects version runs at about 11.5 Mbps.
+  - The voiceover version runs at about 9 Mbps: the highest rate that keeps 60 s under 72 MB.
 - **Audio:** AAC 256 kbps, 48 kHz, -12 LUFS, true peak below -1 dBTP.
 
 There is no music in either version.
@@ -28,9 +28,10 @@ npm install                                        # fonts, world-atlas, topojso
 python3 audio/vo_prep.py                           # fit the narration (vo/) to the scenes
 node render.mjs --from 0 --to 1800 --workers 3     # 2160x3840 -> 1080x1920 lossless PNGs in out/frames
 python3 audio/mix.py                               # out/sfx_mix.wav and out/vo_mix.wav
-./encode.sh                                        # both MP4s, each kept under 99 MB
+./encode.sh                                        # the sound-effects MP4, kept under 99 MB
 node render.mjs --frames 760 --query "notext&cover" --out out/cover   # the cover (src/cover.js)
-node render.mjs --from 0 --to 1800 --query nospeckle --out out/frames_tiktok && ./encode_tiktok.sh
+node render.mjs --from 0 --to 1800 --query nospeckle --out out/frames_tiktok
+./encode_tiktok.sh                                 # the voiceover MP4 for TikTok, under 72 MB
 node render.mjs --from 0 --to 300 --scale 0.25 --out out/preview   # quick low-res check
 ```
 
