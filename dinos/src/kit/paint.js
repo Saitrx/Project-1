@@ -550,13 +550,15 @@ export function cloud(g, x, y, w, seed = 1, { color = '#fbf6ea', shadow = '#cfd2
 // ---------- paper ----------
 
 // Screen-space paper grain: fine light/dark speckle plus faint blotchy tone, as an overlay canvas.
-export function paperGrain(W, H, seed = 9) {
+// speckle: false keeps only the soft blotchy tone. The per-pixel speckle is what TikTok's
+// low-bitrate re-encode spends most bits on, so the TikTok upload files leave it out.
+export function paperGrain(W, H, seed = 9, { speckle = true } = {}) {
   const c = canvas(W, H);
   const g = c.getContext('2d');
   const img = g.createImageData(W, H);
   const d = img.data;
   let s = seed >>> 0;
-  for (let i = 0; i < W * H; i++) {
+  for (let i = 0; speckle && i < W * H; i++) {
     s = (Math.imul(s ^ (s >>> 15), 2246822507) + 0x9e3779b9) >>> 0;
     const v = (s & 0xffff) / 65535;
     const o = i * 4;

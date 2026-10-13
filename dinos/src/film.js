@@ -56,7 +56,7 @@ export async function buildFilm({ W, H, g, params }) {
     return built[id];
   };
   env.get = get;
-  const grain = paperGrain(W, H, 9);
+  const grain = paperGrain(W, H, 9, { speckle: !params.has('nospeckle') });
   const text = canvas(W, H);
   const tg = text.getContext('2d');
   const bufs = [canvas(W, H), canvas(W, H)].map((c) => c.getContext('2d'));
