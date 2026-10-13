@@ -75,8 +75,22 @@ class Bus:
             self.x[i:i + n] += sig[:n]
 
 
-def shape(x, t, gain=0.0, fin=0.01, fout=0.08, pan=0.0, lp=None, hp=None, auto=None, width=1.0):
+def excite(x, drive=4.0, wet=0.0, lo=35, hi=320, out_hp=170, out_lp=3800):
+    """Make deep sounds audible on phone speakers: saturate the bass band to create harmonics in the
+    200 Hz - 2 kHz range (where small speakers work), then mix them in, level-matched to the bass."""
+    b = lowpass(highpass(x, lo), hi)
+    pk = np.abs(b).max() + 1e-9
+    z = np.tanh(drive * b / pk)
+    z = z + 0.35 * z ** 2  # a little even-order too
+    z = lowpass(highpass(z, out_hp), out_lp)
+    z *= np.sqrt((b ** 2).mean()) / (np.sqrt((z ** 2).mean()) + 1e-12) * db(wet)
+    return x + z
+
+
+def shape(x, t, gain=0.0, fin=0.01, fout=0.08, pan=0.0, lp=None, hp=None, auto=None, width=1.0, enhance=None, pan_auto=None):
     x = x.copy()
+    if enhance:
+        x = excite(x, **enhance)
     if hp:
         x = highpass(x, hp)
     if lp:
@@ -98,6 +112,11 @@ def shape(x, t, gain=0.0, fin=0.01, fout=0.08, pan=0.0, lp=None, hp=None, auto=N
     if pan:
         x[:, 0] *= min(1.0, 1 - pan)
         x[:, 1] *= min(1.0, 1 + pan)
+    if pan_auto:
+        tt = t + np.arange(n) / SR
+        pa = np.interp(tt, [p[0] for p in pan_auto], [p[1] for p in pan_auto])
+        x[:, 0] *= np.minimum(1.0, 1 - pa)
+        x[:, 1] *= np.minimum(1.0, 1 + pa)
     return x
 
 

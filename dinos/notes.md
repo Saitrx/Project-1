@@ -141,8 +141,17 @@ The reference has no captions. Its signature text at the very end is not used he
 - **Narration:** saved in `vo/`.
 - **Mix** (`audio/mix.py`):
   - Ambience beds crossfade about 0.5 s between scenes, and spot effects sit on the on-screen events.
-  - In the voiceover version the beds duck 8 dB and the spot effects 6 dB under the voice. The
-    footstep, the city call and the growl duck only 3 dB, so they poke through in the gaps.
+  - In the voiceover version the beds duck 8 dB and the effects 7 dB under the voice, then return
+    to full strength between lines.
   - The voice gets a gentle 80 Hz high-pass and light compression; there is no reverb.
-  - Both mixes are normalised to -14 LUFS with true peak below -1 dBTP, 48 kHz stereo, and fade to
-    silence over the last half second.
+  - Both mixes are normalised to -12 LUFS with true peak below -1 dBTP (checked after the AAC
+    encode), 48 kHz stereo, and fade to silence over the last half second.
+- **Phone-speaker pass**, after feedback that the meteor and the stomp made no sound:
+  - Those clips were almost pure sub-bass (95-99% of their energy below 150 Hz), which phone
+    speakers can't play. Deep sounds now get saturated harmonics in the 200 Hz - 2 kHz range so
+    phones reproduce them.
+  - Five more ElevenLabs layers: a fiery meteor rush, a ground-smash crunch, shaking leaves, a soft
+    swoosh for transitions and a mid-range T. rex snarl.
+  - Extra cues so every moment has sound: the meteor approaching from the start, twinkling dots,
+    the foot coming down and lifting, inset and transition swooshes, the sauropod's exhale, the
+    Triceratops and T. rex breathing, clicks as the skeleton draws in, and the pigeon's steps.

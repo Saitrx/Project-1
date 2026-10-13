@@ -11,7 +11,7 @@ bee animation) are in [notes.md](notes.md).
 
 Both files have:
 - **Video:** two-pass H.264 High, `veryslow`, `tune animation`, about 11.5 Mbps.
-- **Audio:** AAC 256 kbps, 48 kHz, -14 LUFS.
+- **Audio:** AAC 256 kbps, 48 kHz, -12 LUFS, true peak below -1 dBTP.
 
 There is no music in either version.
 
