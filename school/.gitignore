@@ -1,0 +1,7 @@
+node_modules/
+out/
+ref/
+*.wav
+!output/*.wav
+reference_*.mp4
+vo/takes/

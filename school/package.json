@@ -1,0 +1,13 @@
+{
+  "name": "what-if-schools-video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/eb-garamond": "^5.1.0",
+    "d3-geo": "^3.1.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
+    "ws": "^8.18.0"
+  }
+}
