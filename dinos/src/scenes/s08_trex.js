@@ -146,11 +146,14 @@ function buildFence(S) {
   return { L, posts, bars };
 }
 
-// Line-art bite force panel.
+// Line-art bite force panel, timed to "A T-rex bites about eight times harder than a lion": it
+// opens on "bites" (43.1 s), the lion's 1x bar is set down, the T. rex bar grows to 8x as he says
+// "eight times" (43.8-44.5 s), and the lion row lights up on "lion" (45.4 s).
+const PANEL = 43.1;
 function drawPanel(g, t) {
-  const a = smoothstep(44.75, 45.15, t) * (1 - smoothstep(47.15, 47.55, t));
+  const a = smoothstep(PANEL, PANEL + 0.35, t) * (1 - smoothstep(47.15, 47.55, t));
   if (a <= 0) return;
-  const pop = easeOutBack(clamp((t - 44.75) / 0.45), 1.2);
+  const pop = easeOutBack(clamp((t - PANEL) / 0.45), 1.2);
   g.save();
   g.globalAlpha = a;
   g.translate(540, 390);
@@ -175,8 +178,8 @@ function drawPanel(g, t) {
   const unit = 70;
   const bx = 300;
   const rows = [
-    { y: 300, n: 1, t0: 45.25, label: 'lion' },
-    { y: 480, n: 8, t0: 45.7, label: 'T. rex' },
+    { y: 300, n: 1, t0: 43.38, label: 'lion' },
+    { y: 480, n: 8, t0: 43.78, label: 'T. rex' },
   ];
   // ruler ticks (one per lion bite)
   g.strokeStyle = 'rgba(142,143,214,0.75)';
@@ -192,9 +195,14 @@ function drawPanel(g, t) {
   g.moveTo(bx, 552);
   g.lineTo(bx + 8 * unit, 552);
   g.stroke();
+  const lionGlow = Math.exp(-Math.pow((t - 45.55) / 0.3, 2));
   for (const r of rows) {
-    const grow = easeOut(clamp((t - r.t0) / (r.n === 1 ? 0.35 : 1.0)));
+    const grow = easeOut(clamp((t - r.t0) / (r.n === 1 ? 0.35 : 0.8)));
     const len = unit * r.n * grow;
+    if (r.n === 1 && lionGlow > 0.01) {
+      g.fillStyle = `rgba(255,224,160,${0.35 * lionGlow})`;
+      g.fillRect(bx - 8, r.y - 30, len + 16, 60);
+    }
     // bar: gold fill with cream outline and a hatched shadow strip
     g.fillStyle = '#e8b04a';
     g.fillRect(bx, r.y - 22, len, 44);

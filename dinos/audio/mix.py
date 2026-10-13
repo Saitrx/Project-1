@@ -86,15 +86,13 @@ def spots(b, big):
     # 0:00 the meteor: one clean fly-by that grows as it approaches, peaks as it skims past Earth
     # (~4.2 s) and travels right to left with it; under it only the soft space rumble
     b.add(shape(meteor(), 0.6, gain=0, fin=0.3, fout=0.8, pan_auto=[(2.4, 0.45), (3.85, 0.05), (4.95, -0.5)]), 0.6)
-    # 0:05 line-art: a soft zoom as Earth turns into its drawing, ticks as the life dots light up
+    # 0:05 line-art: a soft zoom as Earth turns into its drawing; then, with the narration, an airy
+    # shimmer as the life dots light up (sweeping left to right), a smooth sweep as the donut fills to
+    # 75% ("seventy-five percent"), and a warmer, lower shimmer as the dots flare back ("survived")
     P(b, 'zoom_b', 4.58, gain=-3, hp=70)
-    rng = np.random.default_rng(11)
-    for t in np.linspace(5.85, 7.35, 18):
-        P(b, 'soft_tick', t + rng.uniform(-0.04, 0.04), gain=-7 - rng.uniform(0, 4), pitch=rng.uniform(0.9, 1.2), pan=rng.uniform(-0.5, 0.5))
-    for t in np.linspace(7.95, 8.5, 6):
-        P(b, 'soft_tick', t, gain=-9, pitch=1.3, pan=rng.uniform(-0.4, 0.4))
-    for k, t in enumerate(np.arange(8.75, 10.4, 0.23)):
-        P(b, 'soft_tick', t + rng.uniform(-0.05, 0.05), gain=-12 - (k % 3) * 2, pitch=rng.uniform(1.2, 1.5), pan=rng.uniform(-0.6, 0.6))
+    P(b, 'dots_shimmer_a', 5.2, gain=-7, hp=900, lp=9000, fin=0.2, fout=0.7, pan_auto=[(5.3, -0.35), (6.5, 0.35)])
+    P(b, 'ring_sweep_a', 5.85, gain=-5, hp=120, lp=6000, pan=-0.35)
+    P(b, 'dots_shimmer_b', 8.45, gain=-8, pitch=0.85, hp=600, lp=8000, fin=0.15, fout=0.8)
     P(b, 'zoom_b', 10.2, gain=-3, hp=70, pitch=0.92)  # push into the dot; the circle opens into the forest
     # 0:11 forest: the foot comes down (air), smashes the ground (thud + crunch + leaves), lifts away
     P(b, 'swoosh', 12.75, gain=-3, pitch=0.62)
@@ -124,24 +122,29 @@ def spots(b, big):
     P(b, 'wing_flaps_a', 34.12, start=0.7, gain=-1, pitch=0.92, pan=-0.4)
     P(b, 'soft_tick', 32.35, gain=-9)
     P(b, 'soft_tick', 33.05, gain=-9, pitch=1.1)
-    # 0:36 farm: snort, creaking rail, the balance swings and settles
+    # 0:36 farm: snort, creaking rail; the balance opens on "weighs", the Triceratops then the
+    # elephant land on their pans (soft ticks) and the beam settles
     P(big, 'big_snort', 37.2, gain=1, pan=0.15)
+    P(b, 'swoosh', 37.3, gain=-9, pitch=1.2)
     P(b, 'fence_creak', 38.1, gain=-1)
+    P(b, 'soft_tick', 37.9, gain=-9, pitch=0.85, pan=-0.3)
+    P(b, 'soft_tick', 38.77, gain=-9, pitch=0.8, pan=0.3)
+    P(b, 'soft_tick', 39.47, gain=-11, pitch=1.05)
     P(big, 'big_snort', 40.75, gain=-4, pitch=1.05, pan=0.15)
-    P(b, 'swoosh', 38.85, gain=-7, pitch=1.2)
-    for t, p in ((39.75, 1.0), (40.05, 1.1), (40.3, 1.2)):
-        P(b, 'soft_tick', t, gain=-8, pitch=p)
     # 0:42 T. rex: growl and snarl (big), the fence rattles, the chart slides in, bars grow
     for t in (41.75, 45.9, 47.0):
         P(big, 'big_snort', t, dur=1.6, gain=-3, pitch=0.62, fout=0.4)
     P(big, 'trex_growl_b', 42.75, gain=4, fout=0.8)
     P(big, 'trex_snarl', 43.15, gain=0)
     P(b, 'metal_rattle', 43.98, gain=1)
-    P(b, 'swoosh', 44.75, gain=-7, pitch=1.2)
-    for t in (45.3, 45.75, 46.1, 46.45):
-        P(b, 'soft_tick', t, gain=-8, pitch=1.1)
+    # the bite chart opens on "bites"; the lion's bar is set down, the T. rex bar sweeps out to 8x
+    P(b, 'swoosh', 43.1, gain=-9, pitch=1.2)
+    P(b, 'soft_tick', 43.62, gain=-9, pitch=0.95)
+    P(b, 'ring_sweep_a', 43.72, gain=-12, hp=150, lp=6000, pitch=1.1)
+    P(b, 'soft_tick', 44.5, gain=-9, pitch=0.85)
     # 0:48 skeletons: the dissolve, the morph, bone clicks as the bones light up
     P(b, 'swoosh', 47.55, gain=-3, pitch=0.85)
+    rng = np.random.default_rng(11)
     for k, t in enumerate(np.arange(47.8, 49.6, 0.16)):
         P(b, 'bone_click', t, gain=-9 - (k % 3) * 2, pitch=1.1 + (k % 4) * 0.06, pan=rng.uniform(-0.5, 0.5))
     P(b, 'swoosh', 49.65, gain=-5, pitch=1.0)

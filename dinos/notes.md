@@ -125,6 +125,17 @@ The reference has no captions. Its signature text at the very end is not used he
     every line ends before its scene does. No words were cut.
 - **Captions:** each caption fades in when its sentence starts; the times are in
   `src/vo_timing.js`.
+- **Visuals on the words:** after feedback that the diagrams came in after the narrator had said
+  the words, the lines were transcribed with ElevenLabs Scribe (word timestamps, no credit cost) and
+  mapped into video time through the same trims and speed-ups (saved in `audio/vo_words.json`).
+  Each diagram now moves while its words are spoken:
+  - the life dots pop on during "About seventy-five";
+  - the donut fills to 75% during "seventy-five percent" (5.8-6.9 s);
+  - a glow wave runs over all the dots on "all species";
+  - the doomed dots dim, then flare back on "survived" (8.6 s);
+  - the balance opens on "weighs", and the elephant lands on "elephant" (38.8 s);
+  - the bite chart opens on "bites", the 8x bar grows on "eight times", and the lion row lights up
+    on "lion".
 
 ## Audio
 - There is no music in either version.
@@ -168,3 +179,10 @@ The reference has no captions. Its signature text at the very end is not used he
   - The paper rustles are replaced by a soft, warm zoom whoosh (`zoom_b`):
     - one where Earth turns into its line-art drawing;
     - one, slightly deeper, for the push into the life dot as the circle opens onto the forest.
+- **Globe sounds**, after feedback that the dot sounds were annoying: about 30 quick ticks for the
+  dots and the 75% chart were replaced with three gentle sounds (new ElevenLabs effects, 2 takes
+  each):
+  - an airy shimmer (`dots_shimmer_a`) that pans left to right with the dots;
+  - one smooth sweep (`ring_sweep_a`, the smoother take) as the donut fills;
+  - a lower, warmer shimmer (`dots_shimmer_b`) when the dots flare back.
+  - The balance and bite charts keep only a few soft ticks, when something lands.

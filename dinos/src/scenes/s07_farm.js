@@ -176,10 +176,17 @@ function buildFence(S) {
   return L;
 }
 
+// The balance follows the narration ("A Triceratops weighs as much as an elephant"): the panel
+// opens on "weighs" (37.5 s), the Triceratops lands on its pan and tips the beam, the elephant
+// lands as he says "elephant" (38.8 s) and the beam swings level.
+const PANEL = 37.35;
+const TRIKE_ON = 37.85;
+const ELEPHANT_ON = 38.72;
+
 function drawPanel(g, t) {
-  const a = smoothstep(38.85, 39.25, t) * (1 - smoothstep(41.25, 41.6, t));
+  const a = smoothstep(PANEL, PANEL + 0.35, t) * (1 - smoothstep(41.25, 41.6, t));
   if (a <= 0) return;
-  const pop = easeOutBack(clamp((t - 38.85) / 0.45), 1.2);
+  const pop = easeOutBack(clamp((t - PANEL) / 0.45), 1.2);
   g.save();
   g.globalAlpha = a;
   g.translate(540, 390);
@@ -197,9 +204,12 @@ function drawPanel(g, t) {
   g.beginPath();
   g.roundRect(92, 152, 896, 476, 18);
   g.stroke();
-  // balance: post, beam that swings and settles level, two pans
-  const draw = clamp((t - 39.15) / 0.6);
-  const tilt = 0.32 * Math.exp(-Math.max(0, t - 39.7) * 2.2) * Math.cos(Math.max(0, t - 39.7) * 6.5) * smoothstep(39.6, 39.75, t);
+  // balance: post, beam tipped by the Triceratops, then swinging level once the elephant lands
+  const draw = clamp((t - (PANEL + 0.15)) / 0.5);
+  const land = ELEPHANT_ON + 0.13;
+  const tilt = t < land
+    ? -0.24 * smoothstep(TRIKE_ON + 0.05, TRIKE_ON + 0.5, t)
+    : -0.24 * Math.exp(-(t - land) * 2.2) * Math.cos((t - land) * 6.5);
   const cx = 540;
   const cy = 300;
   g.strokeStyle = '#f1e3c2';
@@ -229,7 +239,7 @@ function drawPanel(g, t) {
     g.lineTo(x + sa * 6, y + ca * 6 - 4);
     g.stroke();
   }
-  const pk = smoothstep(39.4, 39.8, t);
+  const pk = smoothstep(TRIKE_ON - 0.2, TRIKE_ON + 0.1, t);
   for (const [i, [ex, ey]] of ends.entries()) {
     g.globalAlpha = a * pk;
     g.strokeStyle = '#f1e3c2';
@@ -245,9 +255,11 @@ function drawPanel(g, t) {
     g.moveTo(ex - 110, ey + 150);
     g.quadraticCurveTo(ex, ey + 190, ex + 110, ey + 150);
     g.stroke();
-    // silhouettes standing on the pans
+    // silhouettes standing on the pans, each dropping in when it is named
+    const on = smoothstep(i === 0 ? TRIKE_ON : ELEPHANT_ON, (i === 0 ? TRIKE_ON : ELEPHANT_ON) + 0.22, t);
     g.save();
-    g.translate(ex, ey + 150);
+    g.globalAlpha = a * on;
+    g.translate(ex, ey + 150 - 40 * (1 - on));
     g.fillStyle = 'rgba(241,227,194,0.12)';
     g.strokeStyle = '#f1e3c2';
     g.lineWidth = 2;
@@ -256,9 +268,10 @@ function drawPanel(g, t) {
     g.fill(p);
     g.stroke(p);
     g.restore();
+    g.globalAlpha = a * pk;
     sparkle(g, ex, ey, 8, '#d6d7ff', 0.9);
   }
-  g.globalAlpha = a * smoothstep(40.2, 40.6, t);
+  g.globalAlpha = a * smoothstep(39.45, 39.85, t);
   g.fillStyle = '#e8b04a';
   g.font = 'italic 500 64px "EBGaramond"';
   g.textAlign = 'center';
