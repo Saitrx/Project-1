@@ -8,6 +8,9 @@ bee animation) are in [notes.md](notes.md).
 
 - `final/dinosaurs_sfx.mp4`: ambience and sound effects only.
 - `final/dinosaurs_voiceover.mp4`: the same sound effects plus the narrator.
+- `final/cover.png` / `final/cover.jpg`: the TikTok cover (1080x1920). It's the city shot at 25.3 s,
+  zoomed 1.25x, with the title "What if dinosaurs never died?". The suggested caption is in
+  `final/caption.txt`.
 
 Both files have:
 - **Video:** two-pass H.264 High, `veryslow`, `tune animation`, about 11.5 Mbps.
@@ -23,6 +26,7 @@ python3 audio/vo_prep.py                           # fit the narration (vo/) to 
 node render.mjs --from 0 --to 1800 --workers 3     # 2160x3840 -> 1080x1920 lossless PNGs in out/frames
 python3 audio/mix.py                               # out/sfx_mix.wav and out/vo_mix.wav
 ./encode.sh                                        # both MP4s, each kept under 99 MB
+node render.mjs --frames 760 --query "notext&cover" --out out/cover   # the cover (src/cover.js)
 node render.mjs --from 0 --to 300 --scale 0.25 --out out/preview   # quick low-res check
 ```
 

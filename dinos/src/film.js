@@ -2,6 +2,7 @@
 // caption layer on top. render(n) is a pure function of the frame number.
 import { canvas, paperGrain } from './kit/paint.js';
 import { drawCaptions } from './captions.js';
+import { drawCover } from './cover.js';
 import { clamp, smoothstep, easeInOut } from './kit/util.js';
 
 export const FPS = 30;
@@ -144,6 +145,7 @@ export async function buildFilm({ W, H, g, params }) {
       drawCaptions(tg, S, t);
       g.drawImage(text, 0, 0);
     }
+    if (params.has('cover')) drawCover(g, S);
   }
 
   return { render, get, S };
