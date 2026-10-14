@@ -1,14 +1,14 @@
 # What if all the schools disappeared?
 
-An 85.5-second vertical (1080x1920, 30 fps) storybook animation for TikTok. It is drawn entirely in
+An 85.5-second vertical (1080x1920 FHD, 60 fps) storybook animation for TikTok. It is drawn entirely in
 JavaScript Canvas 2D and rendered deterministically in headless Chromium.
 
 ## Deliverables (`output/`)
 
 | File | What |
 | --- | --- |
-| `school_voiceover.mp4` | Picture, sound effects and narrator. Under 68 MB. |
-| `school_sfx.mp4` | Picture and sound effects only. Under 68 MB. |
+| `school_voiceover.mp4` | Picture, sound effects and narrator. FHD 1080x1920, 60 fps, H.264, 20 Mbps, AAC 320 kbps (about 215 MB, stored with Git LFS). |
+| `school_sfx.mp4` | Picture and sound effects only. Same video. |
 | `school_master_for_adobe.mp4` | Picture only, for editing (see `ADOBE_EXPORT.md`). |
 | `school_sfx.wav`, `school_sfx_vo.wav` | The two soundtracks: 48 kHz, 24-bit, about -14 LUFS. |
 | `school_cover.png` | TikTok cover with the title, 1080x1920 (`node cover.mjs`). |
@@ -38,7 +38,7 @@ Other docs:
 npm install                                   # once (also needs ffmpeg and a global playwright)
 python3 audio/vo_prep.py                      # fit the narration -> out/vo/, src/vo_timing.js
 python3 audio/mix.py                          # -> output/school_sfx.wav, output/school_sfx_vo.wav
-node render.mjs --from 0 --to 2565 --out out/frames --workers 3    # PNG frames (2160x3840 -> 1080x1920)
+node render.mjs --from 0 --to 5130 --out out/frames --workers 3    # PNG frames, 60 fps (2160x3840 -> 1080x1920)
 ./encode.sh                                   # -> the three MP4s
 python3 verify.py                             # -> output/VERIFY.md
 ```

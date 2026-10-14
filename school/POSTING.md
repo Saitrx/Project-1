@@ -4,8 +4,12 @@
 - [ ] With narrator: `output/school_voiceover.mp4`.
 - [ ] Sound effects only: `output/school_sfx.mp4`. Use it with on-screen captions only, or with your
   own voice recorded in the TikTok app.
-- Both files are 1080x1920, 30 fps, H.265 / HEVC (Main, tagged hvc1, which TikTok and iPhones play
-  natively) with AAC 320 kbps, 85.5 s long and under 68 MB.
+- Both files are FHD 1080x1920, 60 fps, H.264 at 20 Mbps with AAC 320 kbps, 85.5 s long, about
+  215 MB each.
+- On GitHub they are stored with Git LFS (they are over GitHub's 100 MB limit for normal files): open
+  the file and press **Download** (the "View raw" link also gives the full video).
+- The TikTok phone app may refuse files this big on some phones (older Android limits were about
+  72 MB). If it does, upload from a computer at tiktok.com/upload, which takes much larger files.
 
 **Before uploading**
 - [ ] Watch the file once on your phone, start to finish, with sound on.

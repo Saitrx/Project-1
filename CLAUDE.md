@@ -14,10 +14,12 @@
   9 Mbps for 60 s), AAC 256 kbps stereo. It's rendered with `?nospeckle`; see `dinos/encode_tiktok.sh`.
 - The schools video ("What if all the schools disappeared?", 85.5 s) lives in `school/` (Canvas 2D,
   see `school/README.md`). Its deliverables are in `school/output/`:
-  - `school_voiceover.mp4` and `school_sfx.mp4`, each under 68 MB with AAC 320 kbps;
+  - `school_voiceover.mp4` and `school_sfx.mp4` (AAC 320 kbps);
   - `school_master_for_adobe.mp4`;
   - the two WAVs.
-  All three MP4s are H.265 / HEVC (Main, tagged hvc1), not H.264: the user asked for H.265.
+  The user's export spec (latest): FHD only, 1080x1920, H.264, true 60 fps (rendered at 60, 5130
+  frames), 20 Mbps two-pass, one shared video stream, no lower-quality versions or previews. The
+  MP4s are about 215 MB, so `school/output/*.mp4` is stored with Git LFS (`.gitattributes`).
   No paper or typing sounds, and no yawns, sighs or gasps ("the ahhh sound"): the user finds them
   annoying. Effects are set by loudness against the narrator (`lu=` in `school/audio/mix.py`); no
   effect should be louder than the narrator. The first 5 s matter most to the user.

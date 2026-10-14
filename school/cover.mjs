@@ -2,7 +2,7 @@
 // to float), rendered without captions, with the title set in EB Garamond like the film's captions
 // (cream, soft ink shadow). The title sits on the grass: inside TikTok's 3:4 profile-grid crop and
 // above the feed's bottom 20%.
-//   node render.mjs --frames 237 --query "notext" --out out/cover     (the background frame)
+//   node render.mjs --frames 474 --query "notext" --out out/cover     (the background frame, 7.9 s at 60 fps)
 //   node cover.mjs                                                     (-> output/school_cover.png)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,7 +19,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face { font-family: G; font-weight: 600; font-style: normal; src: ${font(600, 'normal')}; }
 @font-face { font-family: G; font-weight: 700; font-style: italic; src: ${font(700, 'italic')}; }
 html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; }
-body { background: url("file://${dir}/out/cover/00237.png") center / cover; position: relative; }
+body { background: url("file://${dir}/out/cover/00474.png") center / cover; position: relative; }
 .shade { position: absolute; left: 0; right: 0; top: 1180px; height: 520px;
   background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(22,26,12,0.42), rgba(22,26,12,0)); }
 .title { position: absolute; left: 0; right: 0; top: 1300px; text-align: center; font-family: G;

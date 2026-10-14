@@ -1,6 +1,6 @@
 // Scene timing (seconds). SCENES are the 11 scene boundaries (the narration lines fit inside them,
 // see audio/vo_prep.py). TIMELINE entries are [t0, t1, sceneId | transition].
-export const FPS = 30;
+export const FPS = 60;
 export const SCENES = [0, 5.5, 11.5, 18.5, 27.5, 34.5, 42.5, 50, 58.5, 66, 75, 85.5];
 export const DURATION = 85.5;
 export const TIMELINE = [
