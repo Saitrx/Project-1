@@ -176,24 +176,54 @@ def limit(src, dst, gain):
                     '-c:a', 'pcm_s24le', dst], check=True)
 
 
+def aac_overs(path):
+    """Per-10 ms peak (dBFS, 4x oversampled) of the file after an AAC 320 kbps round trip (the
+    delivery codec), so peaks the encoder adds can be found and tamed before delivery."""
+    enc = path.replace('.wav', '_test.m4a')
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', path, '-c:a', 'aac', '-b:a', '320k', '-ar', str(SR), enc], check=True)
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', enc, '-ac', '2', '-ar', str(SR * 4), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
+    os.remove(enc)
+    y = np.abs(np.frombuffer(raw, np.float32).reshape(-1, 2)).max(1)
+    w = SR * 4 // 100
+    nb = len(y) // w
+    return 20 * np.log10(y[: nb * w].reshape(nb, w).max(1) + 1e-9)
+
+
 def master(x, path):
-    """Fade the tail, cut sub-bass below 35 Hz, normalise to TARGET LUFS with an oversampled limiter."""
+    """Fade the tail, cut sub-bass below 35 Hz, normalise to TARGET LUFS with an oversampled limiter,
+    then make sure the AAC-encoded result also keeps its true peak below -1 dBTP: find the spots the
+    encoder pushes over, turn just those down a little before the limiter, and repeat."""
     n = len(x)
     k = int(0.5 * SR)
     x[n - k:] *= (np.cos(np.linspace(0, np.pi / 2, k)) ** 2)[:, None]
     x = highpass(x, 35)
     tmp = path.replace('.wav', '_pre.wav')
     write(tmp, x)
-    gain = TARGET - lufs(tmp)[0]
-    for _ in range(5):
-        limit(tmp, path, gain)
-        I2, TP2 = lufs(path)
-        if abs(I2 - TARGET) < 0.2 and TP2 < -1.0:
+
+    def settle(gain):
+        for _ in range(5):
+            limit(tmp, path, gain)
+            I2, TP2 = lufs(path)
+            if abs(I2 - TARGET) < 0.2:
+                break
+            gain += TARGET - I2
+        return gain
+
+    gain = settle(TARGET - lufs(tmp)[0])
+    for _ in range(8):
+        pk = aac_overs(path)
+        over = np.maximum(0, pk + 1.6)
+        if over.max() <= 0:
             break
-        gain += TARGET - I2
+        nb = len(pk)
+        red = np.array([over[max(0, i - 20): i + 21].max() for i in range(nb)])
+        red = np.convolve(red, np.hanning(15) / np.hanning(15).sum(), 'same') * 1.4 + (red > 0) * 0.4
+        x = x * db(-np.interp(np.arange(len(x)), np.arange(nb) * (SR // 100) + SR // 200, red))[:, None]
+        write(tmp, x)
+        gain = settle(gain)
     os.remove(tmp)
     I2, TP2 = lufs(path)
-    print(f'{os.path.basename(path)}: {I2:.1f} LUFS, true peak {TP2:.1f} dBTP')
+    print(f'{os.path.basename(path)}: {I2:.1f} LUFS, true peak {TP2:.1f} dBTP, after AAC 320k {aac_overs(path).max():.1f} dBFS')
     return I2, TP2
 
 

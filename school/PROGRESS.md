@@ -3,7 +3,20 @@
 Project folder: `school/` (Canvas 2D, same pipeline as `dinos/`). Branch: `claude/adoring-thompson-x0mjor`.
 
 ## Status
-Being rendered and encoded; see the end of this file for the final state.
+**Done.** All outputs are made and verified (`output/VERIFY.md`: every check passes). The PNG
+frames were deleted after verification.
+
+| Output | Result |
+| --- | --- |
+| `output/school_voiceover.mp4` | 67.7 MB. H.264 High 4.2, 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.1 LUFS, true peak -1.6 dBTP. |
+| `output/school_sfx.mp4` | 67.7 MB. Same video. -14.1 LUFS, true peak -1.7 dBTP. |
+| `output/school_master_for_adobe.mp4` | 85.1 MB. Video only, 8 Mbps two-pass. |
+| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.1 LUFS, true peak -1.9 dBTP. |
+
+The first narrated MP4 failed one check: its AAC encode overshot to +1.5 dBTP at 25.0 s and 76.0 s.
+- The mastering now round-trips each mix through AAC 320k and turns down only the spots that would
+  go over, then re-limits.
+- After that, both MP4s measure below -1.5 dBTP.
 
 ## Done
 - **References and notes**

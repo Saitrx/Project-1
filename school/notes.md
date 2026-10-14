@@ -206,6 +206,8 @@ Logos, titles, wordmarks and brand names in the references are not used anywhere
 - Clips are normalised, placed on beds and spot buses, and looped with equal-power crossfades.
 - Sound-effects version: mastered to about -14 LUFS, true peak below -1 dBTP (oversampled limiter),
   48 kHz, 24-bit.
+  - Each mix is also round-tripped through AAC 320k, the delivery codec. Any spot the encoder
+    would push over is turned down locally and re-limited, so the MP4s stay below -1 dBTP too.
 - Voiceover version:
   - The effects dip 7 dB while the narrator speaks (150 ms attack, 450 ms release), so the pop, the
     cheer and the ball come back up between lines.

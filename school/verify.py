@@ -29,7 +29,7 @@ def loudness(path):
 def keyframe_gaps(path):
     r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-skip_frame', 'nokey', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', path],
                        capture_output=True, text=True, check=True)
-    ts = [float(x) for x in r.stdout.split() if x.strip()]
+    ts = [float(x.strip(',')) for x in r.stdout.split() if x.strip(',').strip()]
     gaps = [round(b - a, 3) for a, b in zip(ts, ts[1:])]
     return len(ts), (max(gaps) if gaps else 0)
 
@@ -68,7 +68,6 @@ def video_checks(f, d, v, limit_mb, want_audio, target_kbps=None):
           f"{a['codec_name']} {a['sample_rate']} Hz {a['channels']} ch, {int(a.get('bit_rate', 0)) / 1000:.0f} kbps")
     I, TP = loudness(os.path.join(OUT, f))
     check(f'{f}: loudness', abs(I + 14) <= 1.0 and TP < -1.0, f"{I:.1f} LUFS, true peak {TP:.1f} dBTP")
-    fs = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format_tags=major_brand', '-of', 'csv=p=0', os.path.join(OUT, f)], capture_output=True, text=True).stdout
     with open(os.path.join(OUT, f), 'rb') as fh:
         head = fh.read(4096)
     check(f'{f}: faststart', head.find(b'moov') != -1 and (head.find(b'mdat') == -1 or head.find(b'moov') < head.find(b'mdat')), 'moov atom before mdat')
