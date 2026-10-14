@@ -16,8 +16,8 @@ export const CLOCK = [300, 300, 100];
 export const BOY_UPPER = { spine: 0.42, hunch: 0.5, neck: -0.05, roll: -0.28, turn: 0.25, fv: 0.4, aF: 0.75, eF: 0.9 };
 export function boredBoy(ch, t, extra = {}) {
   const breathe = Math.sin((t * TAU) / 4.2);
-  // one slow sigh: shoulders rise and fall
-  const sigh = Math.exp(-(((t % 9) - 1.9) ** 2) * 2.5);
+  // one slow sigh: shoulders rise and fall (at 3.4 s, just after the opening question, so it is heard)
+  const sigh = Math.exp(-(((t % 9) - 3.4) ** 2) * 2.5);
   const p = pose({
     ...SIT_CHAIR,
     ...BOY_UPPER,

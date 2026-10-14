@@ -402,25 +402,31 @@ export function makeVanish({ cx = 540, cy = 860, t0, rMax = 1500, dur = 1.9, col
       const mx = x + cw / 2;
       const my = y + ch / 2;
       const d = Math.hypot(mx - cx, my - cy);
-      // invert r = rMax * easeOut(u): u = 1 - cbrt(1 - r/rMax)
+      // released when the ring reaches it: invert r = rMax * easeOut(u) -> u = 1 - cbrt(1 - r/rMax)
       const u = 1 - Math.cbrt(Math.max(0, 1 - d / rMax));
-      const tr = t0 + u * dur + rng.range(0, 0.06);
+      const tr = t0 + u * dur + rng.range(0, 0.05);
       const ang = Math.atan2(my - cy, mx - cx);
-      cells.push({
-        x, y, w: cw, h: ch, mx, my, tr,
-        vx: Math.cos(ang) * rng.range(40, 140) + rng.range(-40, 40),
-        vy: Math.sin(ang) * rng.range(30, 90) - rng.range(60, 170),
-        spin: rng.range(-3, 3),
-        flutter: rng.range(1.5, 3.2),
-        phase: rng.range(0, TAU),
-        life: rng.range(1.8, 3.4),
-        paper: rng.next() < 0.34,
-        scrap: [rng.range(0.55, 0.95), rng.range(0.5, 0.8)],
-        lines: rng.int(1, 3),
-        tint: rng.pick(['#f7f1e3', '#f3ead6', '#efe6d0', '#f8f4ea']),
-        dust: Array.from({ length: 3 }, () => [rng.range(-1, 1), rng.range(-1, 0.3), rng.range(0.6, 1.4), rng.range(1.2, 2.8)]),
-        land: rng.next() < 0.12 ? rng.range(1255, 1400) : null,
+      // the piece crumbles into fine grains: pushed outward by the ring, lifted and carried off by
+      // a gust (to the right and up), with a little turbulence; they shrink, pale and fade in air
+      const grains = Array.from({ length: 30 }, () => {
+        const push = rng.range(10, 60);
+        return {
+          ox: rng.range(0, cw),
+          oy: rng.range(0, ch),
+          vx: Math.cos(ang) * push + rng.range(10, 40),
+          vy: Math.sin(ang) * push * 0.5 - rng.range(10, 45),
+          wind: rng.range(70, 150),
+          lift: rng.range(30, 80),
+          size: rng.range(2.6, 6.2),
+          life: rng.range(1.0, 2.0),
+          delay: rng.range(0, 0.32),
+          tf: rng.range(1.5, 3.5),
+          tp: rng.range(0, TAU),
+          shade: rng.range(-0.12, 0.08),
+        };
       });
+      const puffs = rng.next() < 0.3 ? [{ ox: rng.range(0.2, 0.8) * cw, oy: rng.range(0.2, 0.8) * ch, r: rng.range(18, 30), life: rng.range(0.9, 1.5) }] : [];
+      cells.push({ x, y, w: cw, h: ch, mx, my, tr, grains, puffs });
     }
   }
   return { cells, t0 };
@@ -434,79 +440,92 @@ export function drawIntact(g, L, V, t) {
   }
 }
 
-// Draw released cells: the building piece pops, turns into a paper scrap or a puff of chalk dust and
-// drifts away; some scraps settle on the grass.
+// Colours of the building under each grain, read once from the school layers (empty spots, such
+// as sky between the tower and the roof, get no grain).
+function grainColours(layers, V) {
+  if (V.colours) return V.colours;
+  const L0 = layers[0];
+  const W = L0.c.width;
+  const H = L0.c.height;
+  const comp = document.createElement('canvas');
+  comp.width = W;
+  comp.height = H;
+  const cg = comp.getContext('2d', { willReadFrequently: true });
+  for (const L of layers) cg.drawImage(L.c, 0, 0);
+  const data = cg.getImageData(0, 0, W, H).data;
+  V.colours = V.cells.map((c) =>
+    c.grains.map((q) => {
+      const px = Math.min(W - 1, Math.max(0, Math.round((c.x - BOX.x + q.ox) * L0.res)));
+      const py = Math.min(H - 1, Math.max(0, Math.round((c.y - BOX.y + q.oy) * L0.res)));
+      let best = null;
+      for (const [dx, dy] of [[0, 0], [3, 0], [0, 3], [-3, 0], [0, -3], [4, 4], [-4, -4]]) {
+        const xx = Math.min(W - 1, Math.max(0, px + dx));
+        const yy = Math.min(H - 1, Math.max(0, py + dy));
+        const i = (yy * W + xx) * 4;
+        if (data[i + 3] < 60) continue;
+        const lum = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
+        if (lum > 95) return [data[i], data[i + 1], data[i + 2]];
+        if (!best) best = [data[i], data[i + 1], data[i + 2]];
+      }
+      return best ? best.map((v) => Math.min(255, v + 60)) : null;
+    }),
+  );
+  return V.colours;
+}
+
+// Draw released cells: the piece fades out in a blink while it crumbles into grains of its own
+// colours and a soft puff of chalk-white dust; everything drifts off on the gust and fades away.
+// Nothing falls to the ground.
 export function drawReleased(g, layers, V, t) {
-  for (const c of V.cells) {
+  const cols = grainColours(layers, V);
+  V.cells.forEach((c, ci) => {
     const a = t - c.tr;
-    if (a < 0) continue;
-    // chalk dust
-    for (const [dx, dy, sp, sz] of c.dust) {
-      const k = a / 1.3;
+    if (a < 0 || a > 2.5) return;
+    // the solid piece erodes away while its grains peel off
+    const k0 = clamp(a / 0.34);
+    if (k0 < 1) {
+      g.save();
+      g.globalAlpha = (1 - k0) * (1 - k0);
+      for (const L of layers) g.drawImage(L.c, (c.x - BOX.x) * L.res, (c.y - BOX.y) * L.res, c.w * L.res, c.h * L.res, c.x, c.y, c.w + 0.6, c.h + 0.6);
+      g.restore();
+    }
+    // a soft puff of pale dust
+    for (const f of c.puffs) {
+      const k = a / f.life;
       if (k >= 1) continue;
-      const drag = 1 - Math.exp(-a * 2.2);
-      const px = c.mx + (dx * 60 * sp) * drag + c.vx * 0.15 * drag;
-      const py = c.my + (dy * 50 * sp) * drag - 14 * a;
-      g.fillStyle = `rgba(250,248,240,${0.55 * (1 - k) ** 1.5})`;
+      const px = c.x + f.ox + 40 * k;
+      const py = c.y + f.oy - 30 * k;
+      const rr = f.r * (0.8 + 1.8 * k);
+      const gr = g.createRadialGradient(px, py, 0, px, py, rr);
+      gr.addColorStop(0, `rgba(246,242,232,${0.2 * (1 - k) ** 1.5})`);
+      gr.addColorStop(1, 'rgba(246,242,232,0)');
+      g.fillStyle = gr;
       g.beginPath();
-      g.arc(px, py, sz * (1 + k * 1.8), 0, TAU);
+      g.arc(px, py, rr, 0, TAU);
       g.fill();
     }
-    if (!c.paper) {
-      // non-paper cells just flash away into dust
-      const k = clamp(a / 0.22);
-      if (k < 1) {
-        g.save();
-        g.globalAlpha = 1 - k;
-        for (const L of layers) g.drawImage(L.c, (c.x - BOX.x) * L.res, (c.y - BOX.y) * L.res, c.w * L.res, c.h * L.res, c.x - k * 3, c.y - k * 3, c.w + k * 6, c.h + k * 6);
-        g.restore();
-      }
-      continue;
-    }
-    if (a > c.life + 0.6 && !c.land) continue;
-    // motion: initial burst with drag, then a gentle fall with side-to-side flutter
-    const drag = 1 - Math.exp(-a * 1.6);
-    let px = c.mx + (c.vx / 1.6) * drag + Math.sin(a * c.flutter + c.phase) * 14 * clamp(a);
-    let py = c.my + (c.vy / 1.6) * drag + 22 * a * a * 0.5 + 18 * a;
-    let rot = c.spin * a * 0.6 + Math.sin(a * c.flutter * 1.3 + c.phase) * 0.5;
-    let alpha = 1 - clamp((a - c.life) / 0.6);
-    if (c.land && py >= c.land) {
-      // find when it landed (approximate: clamp) and rest there, flat
-      py = c.land;
-      rot = c.spin * 0.4;
-      alpha = 1;
-    }
-    if (alpha <= 0) continue;
-    const morph = clamp(a / 0.3);
-    const sx = lerp(1, c.scrap[0], morph);
-    const sy = lerp(1, c.scrap[1], morph) * (0.55 + 0.45 * Math.abs(Math.cos(a * c.flutter + c.phase)) * (c.land && py >= c.land ? 0 : 1) + (c.land && py >= c.land ? 0.45 : 0));
-    g.save();
-    g.translate(px, py);
-    g.rotate(rot);
-    g.scale(sx, sy);
-    g.globalAlpha = alpha;
-    if (morph < 1) {
-      g.globalAlpha = alpha * (1 - morph);
-      for (const L of layers) g.drawImage(L.c, (c.x - BOX.x) * L.res, (c.y - BOX.y) * L.res, c.w * L.res, c.h * L.res, -c.w / 2, -c.h / 2, c.w, c.h);
-      g.globalAlpha = alpha * morph;
-    }
-    // paper scrap: cream sheet, ink outline, a couple of ruled blue lines
-    g.fillStyle = c.tint;
-    g.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
-    g.strokeStyle = 'rgba(80,110,170,0.6)';
-    g.lineWidth = 1.1;
-    for (let k = 1; k <= c.lines; k++) {
-      const yy = -c.h / 2 + (k / (c.lines + 1)) * c.h;
-      g.beginPath();
-      g.moveTo(-c.w / 2 + 2, yy);
-      g.lineTo(c.w / 2 - 2, yy);
-      g.stroke();
-    }
-    g.strokeStyle = 'rgba(46,34,25,0.7)';
-    g.lineWidth = 1.2;
-    g.strokeRect(-c.w / 2, -c.h / 2, c.w, c.h);
-    g.restore();
-  }
+    // the grains
+    c.grains.forEach((q, gi) => {
+      const col = cols[ci][gi];
+      if (!col) return;
+      const aa = a - q.delay;
+      if (aa < 0) return;
+      const k = aa / q.life;
+      if (k >= 1) return;
+      // a slow start (the grain loosens), then the gust takes it: accelerating right and up
+      const drag = (1 - Math.exp(-aa * 2.4)) / 2.4;
+      const x = c.x + q.ox + q.vx * drag + 0.5 * q.wind * aa * aa + Math.sin(aa * q.tf + q.tp) * 6 * aa;
+      const y = c.y + q.oy + q.vy * drag - 0.5 * q.lift * aa * aa + Math.cos(aa * q.tf * 0.8 + q.tp) * 4 * aa;
+      const pale = Math.min(1, k * 1.1) * 0.85;
+      const base = col.map((v) => Math.max(0, Math.min(255, v * (1 + q.shade))));
+      const r = Math.round(base[0] + (244 - base[0]) * pale);
+      const gg = Math.round(base[1] + (239 - base[1]) * pale);
+      const b = Math.round(base[2] + (228 - base[2]) * pale);
+      const sz = q.size * (1 - 0.6 * k);
+      g.fillStyle = `rgba(${r},${gg},${b},${(1 - k) ** 1.3})`;
+      g.fillRect(x - sz / 2, y - sz / 2, sz, sz);
+    });
+  });
 }
 
 export { BOX as SCHOOL_BOX, drawLayer };

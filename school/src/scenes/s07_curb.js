@@ -173,7 +173,7 @@ export async function build(env) {
     let p;
     if (o.role === 'chin') {
       // elbows on the knees, chin propped on both fists; a slow sigh lifts the shoulders
-      const sigh = Math.exp(-(((t - 44.6) / 0.5) ** 2));
+      const sigh = Math.exp(-(((t - 47.6) / 0.5) ** 2)); // after the ball has rolled past her
       const gl = glance(o, t);
       p = pose({ ...base, spine: 0.8, hunch: 0.35, neck: -0.75 + gl * 0.2, roll: 0.1, turn: 0.3 + gl * 0.45, fv: 0.4, shrug: sigh * 0.5, hN: 1.75, kN: -2.25, fN: 0.4, hF: 1.65, kF: -2.1, fF: 0.4 });
       const h = headAt(ch, p);

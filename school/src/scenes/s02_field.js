@@ -1,11 +1,13 @@
 // 0:05.5-0:27.5 (scenes 2-4), one continuous place: the school on its green field.
 //  2  The camera pulls back out of the boy's classroom window to the whole school. "One second it's
-//     there..." then POP: a blue dot, a thin ring ripples out, and the building breaks into paper
-//     scraps and chalk dust as the ring passes. The kids hang in the air for a beat, then drop softly
-//     and land sitting on the grass.
+//     there..." then POP: a blue dot, a thin ring ripples out, and wherever the ring passes the
+//     building crumbles into fine dust (its own brick, cream and roof colours) that a gust carries
+//     away and that fades in the air: nothing lands. The kids hang in the air for a beat, then drop
+//     and land softly on the grass.
 //  3  Confusion: kids look at each other, heads turning, shrugs; two stand up. The teachers stand
 //     frozen with their chalk and books, looking around.
-//  4  Celebration: jumping, dancing, spinning, a high five, papers thrown in the air, clapping and
+//  4  Celebration: real jumps (crouch, push-off, flight, landing), dancing, spinning, a running
+//     high five, one girl tossing the homework sheets she has been holding since class, clapping and
 //     stomping. The teachers stand still, arms crossed / hands on their heads, not smiling.
 import { Layer, drawLayer } from '../kit/paint.js';
 import { setCam } from '../kit/cam.js';
@@ -14,9 +16,10 @@ import { makePerson, drawPerson, pose, groundShadow, blendPose } from '../kit/pe
 import { sky, hillLayer, meadowLayer, grassTufts, treeLayers, drawTree, cloudLayer, vignette } from '../kit/scenery.js';
 import { buildSchool, drawClockHands, makeVanish, drawIntact, drawReleased, SCHOOL } from '../kit/building.js';
 import { blueDot, ripple, arcFlicks, ring } from '../kit/rings.js';
-import { STAND, SIT_CHAIR, SIT_GROUND, HEAD_ON_HAND, ARMS_UP, SHRUG, ARMS_CROSSED, HANDS_ON_HEAD, HOLD_CHALK, HOLD_BOOKS, LEG, keyPose, idle, jumpCycle, crouchDrop, walkCycle, strideLen, danceCycle } from '../kit/motion.js';
+import { STAND, SIT_CHAIR, SIT_GROUND, HEAD_ON_HAND, ARMS_UP, SHRUG, ARMS_CROSSED, HANDS_ON_HEAD, HOLD_CHALK, HOLD_BOOKS, LEG, keyPose, idle, jumpMotion, crouchDrop, walkCycle, strideLen, danceCycle } from '../kit/motion.js';
 import { CAST } from './cast.js';
 
+export const FALL_G = 1150; // design px/s^2 (1 px ~ 1 cm for these kids): a soft but real fall
 export const POP = 7.62; // the blue dot pops and the ring goes out (just after "...it's there...")
 const DROP = 8.45; // the kids start to fall after hanging for a beat
 const SC = 1.3; // kid scale in the world
@@ -77,12 +80,24 @@ export async function build(env) {
   const clouds = [cloudLayer(S, 260, 3), cloudLayer(S, 200, 8), cloudLayer(S, 320, 12)];
   const rng = makeRng(77);
 
-  // thrown papers in the celebration: bursts at given times from K5's hands
-  const THROWS = [19.05, 22.9, 26.25];
-  const throwPapers = THROWS.map((t0, k) => {
-    const r = makeRng(300 + k);
-    return Array.from({ length: 16 }, () => ({ vx: r.range(-150, 150), vy: r.range(-520, -330), spin: r.range(-4, 4), fl: r.range(2, 3.4), ph: r.range(0, TAU), w: r.range(16, 22), h: r.range(20, 27), tint: r.pick(['#f7f1e3', '#f3ead6', '#fbf7ee']) }));
-  });
+  // the one paper moment: K5 has held her homework sheets since class; at TOSS she throws them up
+  // once. Six sheets rise, slow down, and drift down like leaves, then lie on the grass.
+  const TOSS = 19.05;
+  const THROWS = [TOSS];
+  const tossRng = makeRng(301);
+  const sheets = Array.from({ length: 6 }, (_, i) => ({
+    vx: tossRng.range(-90, 90) + (i - 2.5) * 22,
+    vy: tossRng.range(-430, -330),
+    fl: tossRng.range(2.2, 3.4),
+    ph: tossRng.range(0, TAU),
+    sway: tossRng.range(18, 34),
+    fall: tossRng.range(70, 95),
+    spin: tossRng.range(-1.2, 1.2),
+    rest: tossRng.range(-0.4, 0.4),
+    land: tossRng.range(-28, 30),
+    w: 17,
+    h: 22,
+  }));
 
   // ---- choreography ----
   function kidPose(k, t) {
@@ -102,7 +117,7 @@ export async function build(env) {
     const hangEnd = DROP + (k % 3) * 0.07;
     const startY = K.seat[1];
     const landY = sitY(K.land[1]);
-    const g = 2600;
+    const g = FALL_G;
     const fallDur = Math.sqrt((2 * Math.max(1, landY - startY)) / g);
     const tLand = hangEnd + fallDur;
     if (t < hangEnd) {
@@ -178,8 +193,8 @@ export async function build(env) {
     let dx = 0;
     let dy = 0;
     if (k === 0) {
-      // jumping with arms up
-      const j = jumpCycle(tt / 0.78, 30);
+      // jumping for joy: real jumps with a wind-up, varied heights and short pauses
+      const j = jumpMotion(tt + 0.05, { height: 20, seed: 3, gap: [0.1, 0.5] });
       dy = -j.dy * SC + crouchDrop(Pp, j.crouch) * SC;
       act = { ...base, ...j.pose, turn: 0.15, fv: 0.8 };
     } else if (k === 1) {
@@ -188,28 +203,31 @@ export async function build(env) {
       dy = -d.dy;
       act = { ...base, ...d.pose, turn: 0.1, fv: 0.85, skirtFlutter: 0.8 };
     } else if (k === 2 || k === 4) {
-      // run together, jump, high five (t 19.6), then fist pumps / dance
+      // run together, a real jump (crouch, push-off, flight) and a high five at the top of it
+      // (about 19.77 s), land, then fist-pump jumps / dance
       const meetX = 500;
       const side = k === 2 ? -1 : 1;
       const startX = K.land[0];
-      const targetX = meetX + side * 26;
-      const run = clamp((t - 18.9) / 0.7);
+      const targetX = meetX + side * 35;
+      const run = clamp((t - 18.9) / 0.42);
       const xPos = lerp(startX, targetX, smooth(run));
-      const w = walkCycle((t - 18.9) / 0.42, { amp: 0.55, arm: 0.6 });
-      if (t < 19.6) {
-        act = { ...base, ...w.pose, flip: side === -1 ? 1 : -1, turn: 0.6, fv: 0.35 };
+      const w = walkCycle((t - 18.9) / 0.36, { amp: 0.55, arm: 0.6 });
+      const facing = side === -1 ? 1 : -1;
+      if (t < 19.3) {
+        act = { ...base, ...w.pose, flip: facing, turn: 0.6, fv: 0.35 };
         dx = xPos - K.land[0];
         dy = -w.bob * SC;
       } else if (t < 20.4) {
-        const u = (t - 19.6) / 0.8;
-        const air = Math.sin(clamp(u) * Math.PI);
         dx = targetX - K.land[0];
-        dy = -air * 26 * SC;
-        act = { ...base, flip: side === -1 ? 1 : -1, turn: 0.7, fv: 0.4, aN: lerp(2.0, 2.65, air), eN: 0.15, aF: -0.6, eF: 0.3, hN: 0.4 * air, kN: -0.7 * air, hF: 0.2 * air, kF: -0.9 * air, spine: -0.1 * air };
+        const j = jumpMotion(t - 19.3, { height: 16, seed: 10 + k, n: 1, armsUp: 0.85 });
+        dy = -j.dy * SC + crouchDrop(Pp, j.crouch) * SC;
+        // the high-five hand goes up and forward to meet the partner's; the other arm stays lower
+        act = { ...base, ...j.pose, flip: facing, turn: 0.7, fv: 0.4, aN: lerp(j.pose.aN, 2.35, j.air), eN: lerp(j.pose.eN, 0.1, j.air), aF: lerp(j.pose.aF, -0.5, 0.75), eF: 0.35 };
       } else {
         dx = targetX - K.land[0];
         if (k === 2) {
-          const j = jumpCycle((t - 20.4) / 0.7, 24);
+          // fist-pump jumps: one arm punches up, the other stays bent
+          const j = jumpMotion(t - 20.4, { height: 14, seed: 7, gap: [0.2, 0.7] });
           dy = -j.dy * SC + crouchDrop(Pp, j.crouch) * SC;
           act = { ...base, ...j.pose, aF: -0.5, eF: -1.8, turn: 0.2, fv: 0.7 };
         } else {
@@ -226,7 +244,7 @@ export async function build(env) {
       act = { ...base, flip: Math.sin(ang) >= 0 ? 1 : -1, fv: Math.abs(c), turn: c * 0.3, aN: 1.55, eN: 0.15, aF: -1.55, eF: -0.15, hN: 0.08, kN: -0.1, hF: -0.08, kF: -0.25, skirtFlutter: 1.6, roll: 0.08 };
       dy = -Math.abs(Math.sin(ang * 2)) * 3;
     } else if (k === 5) {
-      // throws papers into the air
+      // tosses her homework sheets into the air, once
       const tk = THROWS.map((x) => t - x + 0.45).filter((x) => x >= 0 && x < 1.4)[0];
       if (tk !== undefined) {
         // crouch with the papers (0-0.4), swing up and release (0.45), arms up, recover
@@ -315,6 +333,7 @@ export async function build(env) {
       const inBuilding = t < POP;
       if (inBuilding !== inside) continue;
       const p = o.p;
+      if (o.kid && o.k === 5 && t >= POP && t < TOSS) p.handN = (gg, x, y, a, st) => st === 'fill' && paperStack(gg, x, y, a);
       if (!o.kid) {
         p.handN = TEACH[o.i].prop === 'chalk' && t < 18.6 ? (gg, x, y, a, st) => st === 'fill' && chalkProp(gg, x, y, a) : null;
         p.handF = TEACH[o.i].prop === 'books' && t < 18.7 ? (gg, x, y, a, st) => st === 'fill' && bookProp(gg, x, y, a) : null;
@@ -358,41 +377,94 @@ export async function build(env) {
     });
   }
 
-  function drawThrown(g, t) {
-    THROWS.forEach((t0, k) => {
-      const a = t - t0;
-      if (a < 0 || a > 4) return;
-      const K = KIDS[5];
-      const x0 = K.land[0] + 4;
-      const y0 = K.land[1] - LEG(people[K.c].P) * SC - 70;
-      throwPapers[k].forEach((q) => {
-        const drag = 1 - Math.exp(-a * 1.8);
-        const x = x0 + (q.vx / 1.8) * drag + Math.sin(a * q.fl + q.ph) * 16 * clamp(a - 0.3);
-        const y = y0 + (q.vy / 1.8) * drag + 40 * a * a + 30 * a;
-        const al = 1 - clamp((a - 3.2) / 0.8);
-        if (y > K.land[1] + 20) return;
-        g.save();
-        g.translate(x, y);
-        g.rotate(q.spin * a * 0.5 + Math.sin(a * q.fl + q.ph) * 0.6);
-        g.scale(1, 0.4 + 0.6 * Math.abs(Math.cos(a * q.fl + q.ph)));
-        g.globalAlpha = al;
-        g.fillStyle = q.tint;
-        g.fillRect(-q.w / 2, -q.h / 2, q.w, q.h);
-        g.strokeStyle = 'rgba(80,110,170,0.6)';
-        g.lineWidth = 1;
-        for (let i = 1; i < 4; i++) {
-          g.beginPath();
-          g.moveTo(-q.w / 2 + 2, -q.h / 2 + (i * q.h) / 4);
-          g.lineTo(q.w / 2 - 2, -q.h / 2 + (i * q.h) / 4);
-          g.stroke();
-        }
-        g.strokeStyle = 'rgba(46,34,25,0.75)';
-        g.lineWidth = 1.1;
-        g.strokeRect(-q.w / 2, -q.h / 2, q.w, q.h);
-        g.restore();
-      });
-    });
+  // the homework sheets after the toss: linear-drag physics (a quick rise that slows, then a
+  // leaf-like fall at a gentle terminal speed with side-to-side sway), then they lie flat on the
+  // grass and stay there
+  const SHEET_K = 3.2;
+  function sheetAt(q, a) {
+    const K = KIDS[5];
+    const x0 = K.land[0] + 6;
+    const y0 = K.land[1] - LEG(people[K.c].P) * SC - 62;
+    const vt = q.fall;
+    const y = y0 + vt * a + ((q.vy - vt) * (1 - Math.exp(-SHEET_K * a))) / SHEET_K;
+    const x = x0 + (q.vx * (1 - Math.exp(-2 * a))) / 2 + Math.sin(a * q.fl + q.ph) * q.sway * clamp(a / 0.6);
+    return [x, y];
   }
+  sheets.forEach((q) => {
+    // when does it reach the grass?
+    const ground = KIDS[5].land[1] + q.land;
+    let lo = 0.2;
+    let hi = 8;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      if (sheetAt(q, mid)[1] < ground) lo = mid;
+      else hi = mid;
+    }
+    q.tl = hi;
+    q.ground = ground;
+    q.lx = sheetAt(q, hi)[0];
+  });
+  function sheet(g, x, y, rot, sy, w, h) {
+    g.save();
+    g.translate(x, y);
+    g.rotate(rot);
+    g.scale(1, sy);
+    g.fillStyle = '#f8f4ea';
+    g.fillRect(-w / 2, -h / 2, w, h);
+    g.strokeStyle = 'rgba(80,110,170,0.55)';
+    g.lineWidth = 1.2;
+    for (let i = 1; i < 5; i++) {
+      g.beginPath();
+      g.moveTo(-w / 2 + 2.5, -h / 2 + (i * h) / 5);
+      g.lineTo(w / 2 - 2.5, -h / 2 + (i * h) / 5);
+      g.stroke();
+    }
+    g.strokeStyle = 'rgba(46,34,25,0.75)';
+    g.lineWidth = 1.3;
+    g.strokeRect(-w / 2, -h / 2, w, h);
+    g.restore();
+  }
+  function drawSheets(g, t, layer) {
+    const a = t - TOSS;
+    if (a < 0) return;
+    for (const q of sheets) {
+      const down = a >= q.tl;
+      if ((layer === 'ground') !== down) continue;
+      if (down) {
+        sheet(g, q.lx, q.ground, q.rest, 0.42, q.w, q.h);
+      } else {
+        const [x, y] = sheetAt(q, a);
+        const tumble = Math.cos(a * q.fl * 1.4 + q.ph);
+        sheet(g, x, y, q.spin * a * 0.5 + Math.sin(a * q.fl + q.ph) * 0.55, 0.3 + 0.7 * Math.abs(tumble), q.w, q.h);
+      }
+    }
+  }
+  // the stack she holds (in her near hand) from the vanish until she tosses it
+  const paperStack = (g, x, y, a) => {
+    g.save();
+    g.translate(x, y);
+    g.rotate(-a + 0.25);
+    for (let i = 2; i >= 0; i--) {
+      g.save();
+      g.translate(i * 1.2, -i * 1.0);
+      g.rotate(i * 0.06);
+      g.fillStyle = '#f8f4ea';
+      g.fillRect(-6, -9, 12, 15);
+      g.strokeStyle = 'rgba(80,110,170,0.5)';
+      g.lineWidth = 0.7;
+      for (let k = 1; k < 4; k++) {
+        g.beginPath();
+        g.moveTo(-5, -9 + k * 3.8);
+        g.lineTo(5, -9 + k * 3.8);
+        g.stroke();
+      }
+      g.strokeStyle = 'rgba(46,34,25,0.75)';
+      g.lineWidth = 0.9;
+      g.strokeRect(-6, -9, 12, 15);
+      g.restore();
+    }
+    g.restore();
+  };
 
   // a worn dirt path from the school door down to the bottom of the frame
   const pathRng = makeRng(88);
@@ -476,7 +548,7 @@ export async function build(env) {
       imprint(g, t);
       drawTree(g, treeL, 70, 1250, t, { scale: 1, seed: 1 });
       drawTree(g, treeR, 1030, 1236, t, { scale: 1, seed: 2 });
-      // landed paper scraps lie on the grass
+      drawSheets(g, t, 'ground');
       // the school
       if (t < POP) {
         drawLayer(g, school.back, 0, 0);
@@ -491,9 +563,9 @@ export async function build(env) {
         drawIntact(g, school.glass, V, t);
       }
       landingPuffs(g, t);
-      if (t >= POP) drawPeople(g, t, false);
       if (t >= POP) drawReleased(g, [school.back, school.front, school.glass], V, t);
-      drawThrown(g, t);
+      if (t >= POP) drawPeople(g, t, false);
+      drawSheets(g, t, 'air');
       // the motif: blue dot pops in at the school's heart, rings ripple out, flicks
       const dotA = smoothstep(POP - 0.35, POP - 0.15, t) * (1 - smoothstep(POP + 1.0, POP + 1.6, t));
       if (dotA > 0) {
@@ -510,36 +582,30 @@ export async function build(env) {
       g.setTransform(1, 0, 0, 1, 0, 0);
       vignette(g, g.canvas.width, g.canvas.height, 0.28);
     },
-    // hand-off into the montage: a thrown paper flies at the camera and fills the frame with cream
+    // hand-off into the montage (film motif): the blue dot pops at the centre and a ring opens,
+    // revealing the cream montage page inside it
     handoff(g, t, u, A, B, Ss) {
       g.drawImage(A, 0, 0);
-      const e = easeIn(clamp(u / 0.75));
       const W = g.canvas.width;
       const Hh = g.canvas.height;
-      const cx = lerp(W * 0.62, W * 0.5, e);
-      const cy = lerp(Hh * 0.55, Hh * 0.5, e);
-      const w = lerp(40 * Ss, W * 1.8, e);
-      const h = w * 1.25;
-      g.save();
-      g.translate(cx, cy);
-      g.rotate(lerp(0.8, 0, e) + Math.sin(u * 9) * 0.1 * (1 - e));
-      g.fillStyle = '#ebe5d8';
-      g.fillRect(-w / 2, -h / 2, w, h);
-      g.strokeStyle = 'rgba(80,110,170,0.5)';
-      g.lineWidth = Math.max(1, w / 140);
-      for (let i = 1; i < 10; i++) {
+      const cx = W / 2;
+      const cy = Hh * 0.47;
+      const e = easeInOut(clamp((u - 0.12) / 0.88));
+      const R = e * Math.hypot(W, Hh) * 0.62;
+      if (R > 0) {
+        g.save();
         g.beginPath();
-        g.moveTo(-w / 2, -h / 2 + (i * h) / 10);
-        g.lineTo(w / 2, -h / 2 + (i * h) / 10);
-        g.stroke();
-      }
-      g.restore();
-      const b = smoothstep(0.7, 1, u);
-      if (b > 0) {
-        g.globalAlpha = b;
+        g.arc(cx, cy, R, 0, TAU);
+        g.clip();
         g.drawImage(B, 0, 0);
-        g.globalAlpha = 1;
+        g.restore();
+        g.save();
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        ring(g, cx, cy, R, { width: 6 * Ss, color: '#2f6fc4', alpha: 1 - smoothstep(0.85, 1, u) });
+        g.restore();
       }
+      const d = smoothstep(0, 0.12, u) * (1 - smoothstep(0.3, 0.45, u));
+      if (d > 0) blueDot(g, cx, cy, 13 * Ss * (1 + 0.3 * Math.sin(clamp(u / 0.2) * Math.PI)), d);
     },
   };
   return scene;

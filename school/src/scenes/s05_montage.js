@@ -1,13 +1,13 @@
 // 0:27.5-0:34.5 Quick montage on cream paper (the reference film's look): three circular insets pop
 // in one after another — sleeping in, playing in the park, a backpack thrown away — each with a thin
 // blue rim and a ring ripple. As the narrator lists "No homework. No tests. No alarms." the matching
-// inset swells and its moment plays (homework flies out of the backpack, a test sheet becomes a
-// paper plane, the alarm clock stays silent while the kid rolls over).
+// inset swells and its moment plays (the backpack is flung away, a kid jumps for joy in the park,
+// the alarm clock stays silent while the kid sleeps on).
 import { setCam } from '../kit/cam.js';
 import { makeRng, clamp, lerp, smooth, smoothstep, easeOut, easeInOut, easeOutBack, TAU, rgba, shade, mix } from '../kit/util.js';
 import { INK, smoothPath, hatch, mottle } from '../kit/paint.js';
 import { makePerson, drawPerson, pose, groundShadow, blendPose, reach, headAt } from '../kit/person.js';
-import { STAND, SIT_CHAIR, LEG, idle, walkCycle, jumpCycle, crouchDrop } from '../kit/motion.js';
+import { STAND, SIT_CHAIR, LEG, idle, walkCycle, jumpMotion, crouchDrop } from '../kit/motion.js';
 import { blueDot, ring, ripple, arcFlicks, RING_BLUE } from '../kit/rings.js';
 import { sky, treeLayers, drawTree, grassTufts } from '../kit/scenery.js';
 import { VO } from '../vo_timing.js';
@@ -217,46 +217,18 @@ export async function build(env) {
     const sp = pose({ ...SIT_CHAIR, x: 0, y: -8, sc: 1.55, flip: 1, fv: 0.4, turn: 0.4, hN: 1.4 + legs * 0.3, kN: -1.2 + legs, hF: 1.3 + legs * 0.3, kF: -1.3 + legs, spine: -legs * 0.3, aN: 3.0, eN: -0.2, aF: 2.9, eF: -0.2, skirtFlutter: 1 });
     drawPerson(g, swingKid, sp, { t, light: [-0.6, -0.8] });
     g.restore();
-    // a kid jumps for joy, and at "No tests" folds the test into a paper plane and throws it
+    // a kid jumps for joy: real jumps (wind-up, push-off, flight, landing) with little pauses
     const ch = runKid;
     const y0 = 160 - LEG(ch.P) * 1.5;
-    let p;
-    const tk = t - (hi > 0 ? 0 : 99);
-    const j = jumpCycle(t / 0.9, 22);
-    p = pose({ ...STAND, ...j.pose, x: 70, y: y0 - j.dy * 1.5 + crouchDrop(ch.P, j.crouch) * 1.5, sc: 1.5, flip: -1, fv: 0.8, turn: -0.2 });
-    groundShadow(g, 70, 160, 40, 0.2);
+    const j = jumpMotion(t - 27.95, { height: 16, seed: 21, gap: [0.15, 0.55] });
+    const p = pose({ ...STAND, ...j.pose, x: 70, y: y0 - j.dy * 1.5 + crouchDrop(ch.P, j.crouch) * 1.5, sc: 1.5, flip: -1, fv: 0.8, turn: -0.2 });
+    groundShadow(g, 70, 160, 40 * (1 - j.dy / 60), 0.2);
     drawPerson(g, ch, p, { t, light: [-0.6, -0.8] });
-    // paper plane (the test) flies out on "No tests"
-    const pa = t - (INSETS[1].hi - 0.05);
-    if (pa > 0) {
-      const x = 60 - pa * 160;
-      const y = -40 - pa * 60 + Math.sin(pa * 3) * 14;
-      g.save();
-      g.translate(x, y);
-      g.rotate(-0.25 + Math.sin(pa * 3) * 0.1);
-      g.fillStyle = '#fbf7ee';
-      g.strokeStyle = INK;
-      g.lineWidth = 2;
-      g.beginPath();
-      g.moveTo(-28, 0);
-      g.lineTo(26, -8);
-      g.lineTo(-20, 12);
-      g.closePath();
-      g.fill();
-      g.stroke();
-      g.strokeStyle = 'rgba(200,60,60,0.8)';
-      g.beginPath();
-      g.moveTo(-10, 2);
-      g.lineTo(6, -2);
-      g.stroke();
-      g.restore();
-    }
     grassTufts(g, t, { x0: -R, x1: R, y: R - 10, n: 60, len: [14, 30], seed: 81 });
   }
 
   // ---------- inset C: the backpack thrown away ----------
   const bagKid = people[6];
-  const sheets = Array.from({ length: 9 }, () => ({ vx: rng.range(-120, 160), vy: rng.range(-260, -120), sp: rng.range(-4, 4), fl: rng.range(2, 3.4), ph: rng.range(0, TAU) }));
   function bag(g, t, R, hi) {
     sky(g, -R, -R, 2 * R, 2 * R, [[0, '#a7cfe4'], [0.6, '#eaf0dc'], [1, '#e6e0c8']]);
     // front yard: fence and lawn
@@ -287,15 +259,15 @@ export async function build(env) {
     let p = pose({ ...STAND, x: -60, y: y0, sc: 1.55, flip: 1, fv: 0.55, turn: 0.4 });
     p = blendPose(p, pose({ ...p, spine: -0.15, aN: -1.4, eN: 0.6, aF: -0.6, eF: 0.4, hN: 0.3, kN: -0.3 }), wind);
     if (tt > 0) {
-      const j = jumpCycle((tt - 0.3) / 0.8, 18);
-      const jp = tt > 0.3 ? j : { dy: 0, crouch: 0, pose: {} };
-      p = blendPose(p, pose({ ...STAND, ...jp.pose, x: -60, y: y0 - jp.dy * 1.55, sc: 1.55, flip: 1, fv: 0.8, turn: 0.15, aN: 2.7, eN: 0.2, aF: -2.6, eF: -0.2 }), after);
+      // two happy jumps after the throw
+      const jp = jumpMotion(tt - 0.3, { height: 15, seed: 5, n: 2, gap: [0.1, 0.3] });
+      p = blendPose(p, pose({ ...STAND, ...jp.pose, x: -60, y: y0 - jp.dy * 1.55 + crouchDrop(ch.P, jp.crouch) * 1.55, sc: 1.55, flip: 1, fv: 0.8, turn: 0.15 }), after);
     }
     groundShadow(g, -60, 150, 42, 0.2);
     drawPerson(g, ch, p, { t, light: [-0.6, -0.8] });
     // the backpack: on his back, then flying away tumbling, then landing far right
     const bx = tt < 0 ? -78 : -60 + tt * 260;
-    const by = tt < 0 ? y0 - 10 : y0 - 30 - tt * 220 + 260 * tt * tt;
+    const by = tt < 0 ? y0 - 10 : y0 - 30 - tt * 480 + 575 * tt * tt;
     const land = by > 120;
     g.save();
     g.translate(land ? Math.min(bx, 170) : bx, land ? 120 : by);
@@ -313,34 +285,6 @@ export async function build(env) {
     g.fill();
     g.stroke();
     g.restore();
-    // homework sheets flying out of it
-    if (tt > 0.15) {
-      const a = tt - 0.15;
-      sheets.forEach((q) => {
-        const drag = 1 - Math.exp(-a * 1.6);
-        const x = Math.min(bx, 170) + (q.vx / 1.6) * drag + Math.sin(a * q.fl + q.ph) * 10;
-        const y = Math.min(by, 120) - 10 + (q.vy / 1.6) * drag + 40 * a * a;
-        if (y > 160) return;
-        g.save();
-        g.translate(x, y);
-        g.rotate(q.sp * a * 0.5);
-        g.scale(1, 0.4 + 0.6 * Math.abs(Math.cos(a * q.fl + q.ph)));
-        g.fillStyle = '#fbf7ee';
-        g.fillRect(-11, -14, 22, 28);
-        g.strokeStyle = 'rgba(80,110,170,0.7)';
-        g.lineWidth = 1.3;
-        for (let k = 1; k < 5; k++) {
-          g.beginPath();
-          g.moveTo(-9, -14 + k * 5.6);
-          g.lineTo(9, -14 + k * 5.6);
-          g.stroke();
-        }
-        g.strokeStyle = INK;
-        g.lineWidth = 1.4;
-        g.strokeRect(-11, -14, 22, 28);
-        g.restore();
-      });
-    }
     grassTufts(g, t, { x0: -R, x1: R, y: R - 6, n: 60, len: [14, 30], seed: 83 });
   }
 

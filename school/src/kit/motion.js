@@ -98,6 +98,95 @@ export function jumpCycle(ph, height = 34) {
   };
 }
 
+// A believable, physically timed jump (or a run of jumps). `a` is seconds since the first crouch.
+// Each jump: anticipation crouch with the arms swinging back, an explosive push-off with the arms
+// swinging up, a ballistic flight under real gravity for a child this size (1 local unit ~ 1.3 cm,
+// g ~ 740 units/s^2: a 25 cm jump stays up ~0.45 s), knees tucking a little at the top, then a
+// landing that absorbs into the knees and settles. Heights, timings and the pauses between jumps
+// vary per jump (seeded) so it never looks like a loop. Returns { dy (up, local units), crouch
+// (0..1, use with crouchDrop), pose, landed (seconds since the last touch-down, or -1) }.
+export function jumpMotion(a, { height = 18, seed = 1, gap = [0.08, 0.45], n = 99, g = 740, armsUp = 1 } = {}) {
+  const r = (i, k) => {
+    const x = Math.sin((seed * 127.1 + i * 311.7 + k * 74.7) * 12.9898) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  let t0 = 0;
+  for (let i = 0; i < n; i++) {
+    const h = height * (0.8 + 0.4 * r(i, 1));
+    const tc = 0.17 + 0.05 * r(i, 2); // crouch
+    const tp = 0.07; // push-off
+    const tf = 2 * Math.sqrt((2 * h) / g); // flight
+    const tl = 0.13; // absorb
+    const tr = 0.2; // recover
+    const pause = gap[0] + (gap[1] - gap[0]) * r(i, 3);
+    const end = t0 + tc + tp + tf + tl + tr + pause;
+    if (a < end || i === n - 1) {
+      const u = a - t0;
+      const cDepth = 0.75 + 0.15 * r(i, 4);
+      let crouch = 0;
+      let dy = 0;
+      let air = 0;
+      let swing = 0; // arm swing: -1 back, +1 up
+      let landed = -1;
+      if (u < 0) {
+        swing = 0.2;
+      } else if (u < tc) {
+        const k = smooth(u / tc);
+        crouch = cDepth * k;
+        swing = lerp(0.2, -1, k);
+      } else if (u < tc + tp) {
+        const k = (u - tc) / tp;
+        crouch = cDepth * (1 - k) * (1 - k);
+        swing = lerp(-1, 0.9, 1 - (1 - k) * (1 - k));
+      } else if (u < tc + tp + tf) {
+        const k = (u - tc - tp) / tf;
+        dy = 4 * h * k * (1 - k);
+        air = Math.sin(k * Math.PI);
+        swing = 1;
+      } else if (u < tc + tp + tf + tl) {
+        const k = (u - tc - tp - tf) / tl;
+        crouch = 0.55 * Math.sin(k * Math.PI * 0.5);
+        swing = lerp(1, 0.55, k);
+        landed = u - tc - tp - tf;
+      } else {
+        const k = clamp((u - tc - tp - tf - tl) / tr);
+        crouch = 0.55 * (1 - smooth(k));
+        swing = lerp(0.55, 0.75, k);
+        landed = u - tc - tp - tf;
+      }
+      const up = Math.max(0, swing) * armsUp;
+      const back = Math.max(0, -swing);
+      const wave = Math.sin(a * 9 + seed) * 0.08 * air;
+      return {
+        dy,
+        crouch,
+        air,
+        landed,
+        pose: {
+          spine: 0.3 * crouch - 0.06 * air,
+          hunch: 0.08 + 0.2 * crouch,
+          neck: 0.12 * crouch - 0.22 * air,
+          hN: 0.55 * crouch + 0.3 * air,
+          kN: -1.0 * crouch - 0.55 * air,
+          hF: 0.5 * crouch + 0.22 * air,
+          kF: -0.95 * crouch - 0.65 * air,
+          fN: 0.35 * air,
+          fF: 0.35 * air,
+          // arms: hang -> swing back on the crouch -> whip up overhead in the air
+          aN: 0.1 - 0.75 * back + 2.55 * up + wave,
+          eN: 0.25 + 0.25 * back - 0.05 * up,
+          aF: -0.05 - 0.6 * back - 2.5 * up - wave,
+          eF: -0.2 - 0.15 * back,
+          sqy: 1 - 0.04 * crouch + 0.03 * air,
+          sqx: 1 + 0.03 * crouch,
+        },
+      };
+    }
+    t0 = end;
+  }
+  return { dy: 0, crouch: 0, air: 0, landed: -1, pose: {} };
+}
+
 // How much the hip drops when the knees bend by `crouch` (approx, local units).
 export const crouchDrop = (P, crouch) => P.thigh * (1 - Math.cos(0.55 * crouch)) + P.shin * (1 - Math.cos(0.45 * crouch)) + crouch * 4;
 

@@ -1,10 +1,17 @@
 """Sound mix for both versions of the school video (organic sounds only: no music, melodies,
-stingers, risers or tonal pads).
+stingers, risers or tonal pads; no paper or pencil/typing sounds).
   output/school_sfx.wav      ambience beds + spot effects
   output/school_sfx_vo.wav   the same effects, ducked 7 dB while the narrator speaks, plus the voice
 Every sound is an ElevenLabs sound-effects clip from sfx/ (see notes.md). Spot effects sit on the
-on-screen events (times come from the scene code). Both mixes: 48 kHz, 24-bit stereo, about -14 LUFS
-integrated, true peak below -1 dBTP.
+on-screen events (times come from the scene code; jump and fall times are worked out from the same
+physics the scenes use). How it is made to sound real rather than pasted on:
+  - every place has its own continuous air (room tone, field, street, dusk park...), crossfaded on
+    the picture's transitions, so the sound never drops to dead digital silence until the ending;
+  - voices and hits are placed where the person is on screen (pan) and at their distance: far kids
+    are quieter, duller (low-pass) and carry more of the place's reverb than close ones;
+  - repeated actions use different takes, pitches and levels so nothing sounds copy-pasted;
+  - landings are a soft grass thump plus a little low weight, not a cartoon boom.
+Both mixes: 48 kHz, 24-bit stereo, about -14 LUFS integrated, true peak below -1 dBTP.
 """
 import json
 import os
@@ -14,148 +21,281 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from engine import SR, Bus, put, loop, db, highpass, lowpass  # noqa: E402
+from engine import SR, Bus, load, shape, repitch, reverb, curve, db, highpass, lowpass  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LEN = 85.5
 TARGET = -14.0
 LINE_LUFS = -30.0
 DUCK_DB = 7.0  # effects dip this much while the narrator speaks (spec: 6-8 dB)
-VO_FX_GAIN = 14.0  # effects level in the voiceover version, relative to the voice (see the report)
+VO_FX_GAIN = 16.0  # effects level in the voiceover version, relative to the voice (see the report)
+# narrated version only: a few loud moments that land on words get turned down a little more than
+# the ducking does (start, end, dB), so every word stays clear; the effects-only mix keeps them full
+VO_RIDES = [(0.5, 2.6, -3), (18.7, 21.0, -4), (29.55, 29.95, -3), (37.2, 39.7, -2), (60.9, 62.9, -2), (75.2, 81.3, -2)]
 
-# event times taken from the scene code
-POP = 7.62
-DROP = 8.45
-KIDS = [((306, 1213), (292, 1312)), ((423, 1213), (402, 1304)), ((423, 948), (452, 1262)), ((306, 948), (338, 1274)),
-        ((540, 948), (548, 1268)), ((657, 948), (642, 1300)), ((774, 948), (738, 1290))]
-THROWS = [19.05, 22.9, 26.25]
-BAG_THROW = 28.45 + 0.35
+# ---- event times taken from the scene code ----
+POP = 7.62  # s02_field: the blue dot (from POP - 0.35) pops, the ring goes out, the school turns to dust
+# kids' falls after hanging (FALL_G 1150): landing time and landing x of each kid
+FALLS = [(8.848, 292), (8.900, 402), (9.320, 452), (9.194, 338), (9.257, 548), (9.364, 642), (9.212, 738)]
+# s02 celebration (jumpMotion): landings of K0's joy jumps, the high-five pair, K2's fist pumps
+K0_LAND = [19.536, 21.008, 22.578, 23.81, 25.316, 26.582]
+HF_APEX = 19.755  # both kids at the top of their jump: the slap
+HF_LAND = [19.93, 19.956]
+K2_TAKEOFF = [20.656, 21.878, 23.502, 24.82, 26.258]
+K2_LAND = [21.042, 22.264, 23.876, 25.218, 26.664]
+TOSS = 19.05  # K5 throws her homework sheets up (silent: no paper sounds)
+# s05 montage
+PARK_LAND = [28.634, 30.14, 31.536, 32.772, 34.066]
+BAG_THROW = 28.8
+BAG_LAND = 29.74
+BAG_KID_LAND = [29.752, 31.034]
+SWING_BOTTOM = [28.80, 30.11, 31.42, 32.72, 34.03]  # swing passes the bottom (period 2.62 s)
+# s06 globe
+T_YEAR = 36.39
+WAVES = [37.39, 38.39, 39.39]
+# s07 curb
 BALL_T = 45.35
-
-
-def land_times():
-    out = []
-    for k, (seat, land) in enumerate(KIDS):
-        land_y = land[1] - 6 * 1.3
-        out.append(DROP + (k % 3) * 0.07 + np.sqrt(2 * max(1, land_y - seat[1]) / 2600))
-    return out
+# s08 literacy
+T_SLIDE = 54.77
+# s09 future
+PANELS = [58.35, 60.25, 61.6]
+INSET9 = 62.42
+# s10 sad
+FRIENDS_GO = [68.15, 68.55, 68.9, 69.3]
+# s11 ending
+T_ERASE = 78.45
+T_RING = 81.522
 
 
 def vo_times():
     return json.load(open(os.path.join(ROOT, 'out/vo/timing.json')))
 
 
-def tick(b, t, gain=-3.0, **kw):
-    # one tick of the classroom clock (the clip ticks once a second, first tick at 0.16 s)
-    start = 1.05 if int(round(t)) % 2 else 2.05
-    put(b, 'clock_tick', t - 0.11, start=start, dur=0.7, gain=gain, fin=0.005, fout=0.2, **kw)
+def pan_x(x, cx=540, z=1.0, k=0.8):
+    """Stereo position of something at design x when the camera centres cx at zoom z."""
+    return float(np.clip((x - cx) * z / 540 * k, -0.85, 0.85))
+
+
+def clip(name, start=0.0, dur=None, pitch=1.0):
+    x = load(name)
+    if pitch != 1.0:
+        x = repitch(x, pitch)
+    x = x[int(start * SR):]
+    if dur is not None:
+        x = x[:int(dur * SR)]
+    return x
+
+
+def put(bus, name, t, start=0.0, dur=None, pitch=1.0, verb=None, **kw):
+    """Place clip `name` at time t, trimmed from `start` for `dur` s, optionally through a short
+    reverb (rt, wet dB) for the place it happens in."""
+    x = clip(name, start, dur, pitch)
+    if verb:
+        rt, wet = verb
+        x = reverb(np.concatenate([x, np.zeros((int(rt * SR), 2))]), rt=rt, wet=wet, seed=int(t * 10) % 97)
+    bus.add(shape(x, t, **kw), t)
+
+
+def loop(bus, name, t0, t1, xfade=1.5, start=0.0, pitch=1.0, **kw):
+    """Fill t0..t1 with `name`, repeating it with equal-power crossfades."""
+    x = clip(name, start, None, pitch)
+    need = int((t1 - t0) * SR)
+    k = int(xfade * SR)
+    out = x.copy()
+    a = np.sin(np.linspace(0, np.pi / 2, k))[:, None]
+    while len(out) < need:
+        out = np.concatenate([out[:-k], out[-k:] * a[::-1] + x[:k] * a, x[k:]])
+    bus.add(shape(out[:need], t0, **kw), t0)
+
+
+# reverbs for the places (rt seconds, wet dB)
+ROOM = (0.55, -13)  # classroom
+FIELD = (0.45, -19)  # open field: almost dry, a little air
+STREET = (0.8, -15)  # street between houses
+PARK = (0.6, -18)
+
+
+def landing(b, t, pan, gain=-8.0, pitch=1.0, alt=False, verb=FIELD):
+    """A kid landing on grass: a soft thump (sneakers/body on the lawn) plus a little low weight."""
+    put(b, 'hop_thump_alt' if alt else 'hop_thump', t - 0.05, pitch=0.86 * pitch, gain=gain, fout=0.12, pan=pan, verb=verb)
+    put(b, 'grass_thud', t, dur=0.35, gain=gain - 9, fout=0.15, pan=pan, hp=40, lp=260)
+
+
+def hop(b, t, pan, gain=-12.0, alt=False, lp=None, verb=FIELD):
+    """A light jump landing (feet only)."""
+    put(b, 'hop_thump_alt' if alt else 'hop_thump', t - 0.05, gain=gain, fout=0.1, pan=pan, lp=lp, verb=verb)
+
+
+def tick(b, t, gain=-10.0, **kw):
+    """One tick of the classroom wall clock (the clip is a single tick at 0.0 s), softened a little
+    so it reads as a wall clock across the room, not a click in the ear."""
+    put(b, 'clock_tick', t - 0.005, dur=0.6, gain=gain, fin=0.002, fout=0.25, lp=kw.pop('lp', 5000), **kw)
+
+
+def flicker_points(t0, t1, dim=-14.0):
+    """Gain points that follow the hallway's flickering ceiling light in s09 (its buzz dips when the
+    tube dims) and stop when it goes out at 64.0 s."""
+    pts = []
+    for t in np.arange(t0, t1, 0.01):
+        if t > 64.0:
+            g = -40.0
+        else:
+            fl = np.sin(t * 37) * np.sin(t * 13.3 + 1)
+            g = dim if fl > 0.55 else 0.0
+        pts.append((float(t), g))
+    return pts
 
 
 def beds(b):
-    # 1 classroom
-    loop(b, 'classroom_tone', 0.0, 6.1, gain=-9, fin=0.05, fout=0.9)
-    # 2-4 the field where the school stands / stood
-    loop(b, 'field_amb', 5.2, 27.4, gain=-10, fin=0.9, fout=0.7)
-    loop(b, 'murmurs', 11.6, 18.7, gain=-12, fin=0.7, fout=0.9)
-    # 5 montage: park, birds, a little wind
-    loop(b, 'park_amb', 27.4, 34.4, gain=-12, fin=0.4, fout=0.6)
-    loop(b, 'birds_morning', 27.4, 34.4, gain=-14, fin=0.4, fout=0.6, pan=0.15)
-    loop(b, 'wind_soft', 27.4, 34.4, gain=-19, fin=0.6, fout=0.6)
-    # 7 curb: wind, distant traffic, a few leaves
-    loop(b, 'wind_soft', 42.0, 50.3, gain=-12, fin=0.7, fout=0.8)
-    loop(b, 'distant_traffic', 42.0, 50.3, gain=-14, fin=0.7, fout=0.8, lp=5000)
-    loop(b, 'leaves_rustle', 42.0, 50.3, gain=-20, fin=0.7, fout=0.8)
-    # 8 literacy inset is outdoors: a breath of wind under the diagram
-    loop(b, 'wind_soft', 53.9, 58.5, gain=-21, fin=0.5, fout=0.6)
-    # 9 future: hallway echo, then wind over the half-built bridge, then the empty airfield
-    loop(b, 'hallway_echo', 58.1, 66.2, gain=-11, fin=0.5, fout=0.8, auto=[(58.1, 0), (60.2, 0), (61.0, -6), (66.2, -7)])
-    loop(b, 'bridge_wind', 60.1, 66.2, gain=-11, fin=0.4, fout=0.8, auto=[(60.1, 0), (61.6, 0), (62.4, -6), (66.2, -6)])
-    loop(b, 'airfield_wind', 61.5, 66.4, gain=-10, fin=0.4, fout=0.8)
-    # 10 sad: quiet wind and leaves
-    loop(b, 'wind_soft', 65.5, 75.2, gain=-11, fin=0.8, fout=0.9)
-    loop(b, 'leaves_rustle', 65.5, 75.2, gain=-13, fin=0.8, fout=0.9)
-    # 11 ending: the field again, quieter; everything is gone after the last ring (then silence)
-    loop(b, 'field_amb', 74.6, 82.4, gain=-15, fin=0.9, fout=0.9)
-    loop(b, 'wind_soft', 74.6, 82.4, gain=-16, fin=0.9, fout=0.9)
+    # (beds are high-passed: their wind rumble below ~100 Hz is inaudible on phones and only muddies
+    # the mix)
+    # 1 classroom: still room, ventilation, birds muffled behind the window
+    loop(b, 'classroom_tone', 0.0, 6.2, gain=-10, fin=0.05, fout=0.9, hp=90)
+    # 2-4 the open field around the school (breeze in the grass, distant birds)
+    loop(b, 'field_morning', 5.1, 27.5, gain=-11, fin=0.9, fout=0.6, hp=80, lp=8000)
+    loop(b, 'breeze', 5.1, 27.5, gain=-21, fin=0.9, fout=0.6, hp=100)
+    # 5 montage: birds outside the bedroom window, a park with kids far away, a light breeze
+    loop(b, 'garden_birds', 27.4, 34.4, gain=-15, fin=0.5, fout=0.6, lp=6500, hp=150)
+    loop(b, 'park_far_kids', 27.7, 34.3, gain=-21, fin=0.5, fout=0.6, pan=-0.35, lp=5500, hp=150)
+    loop(b, 'breeze', 27.9, 34.3, gain=-22, fin=0.5, fout=0.6, pan=0.3, hp=100)
+    # 6 globe (a diagram): the quiet air of a large empty hall, nothing else
+    loop(b, 'hall_air', 34.2, 42.6, gain=-19, fin=0.8, fout=0.7, lp=3500, hp=150)
+    # 7 curb: an evening street, distant traffic, dry leaves moving on the pavement
+    loop(b, 'street_evening', 42.0, 50.3, gain=-11, fin=0.7, fout=0.8, hp=70)
+    loop(b, 'leaves_skitter', 42.0, 50.3, gain=-19, fin=0.7, fout=0.8, pan=0.2, lp=7000, hp=200)
+    loop(b, 'breeze', 42.0, 50.3, gain=-22, fin=0.7, fout=0.8, hp=100)
+    # 8 literacy: the diagram's hall air, then the street around the LIBRARY sign in the inset
+    loop(b, 'hall_air', 49.6, 58.5, gain=-20, fin=0.6, fout=0.6, lp=3500, auto=[(49.6, 0), (54.0, 0), (54.6, -5), (58.5, -5)], hp=150)
+    loop(b, 'street_evening', 53.9, 58.5, gain=-18, fin=0.6, fout=0.5, pan=-0.1, hp=70)
+    # 9 future: empty hospital corridor, then wind over the half-built bridge and the river, then
+    # the windy airfield (windsock flapping); each fades back as the next panel arrives
+    loop(b, 'hospital_corridor', 58.1, 66.1, gain=-12, fin=0.5, fout=0.8, auto=[(58.1, 0), (60.2, 0), (60.9, -7), (66.1, -8)], hp=80)
+    loop(b, 'light_flicker', 58.35, 64.2, gain=-19, fin=0.3, fout=0.05, pan=0.1, auto=flicker_points(58.35, 64.2), hp=200, lp=4000)
+    loop(b, 'bridge_wind', 60.1, 66.2, gain=-14, fin=0.4, fout=0.8, auto=[(60.1, 0), (61.5, 0), (62.2, -6), (66.2, -6)], hp=90)
+    loop(b, 'river', 60.1, 66.2, gain=-17, fin=0.5, fout=0.8, lp=6000, auto=[(60.1, 0), (61.5, 0), (62.2, -5), (66.2, -5)], hp=80)
+    loop(b, 'runway_wind', 61.5, 66.4, gain=-11, fin=0.4, fout=0.8, hp=80)
+    loop(b, 'flag_flap', 61.6, 66.4, gain=-18, fin=0.4, fout=0.8, pan=0.3, hp=150)
+    # 10 sad: a park at dusk, crickets, the big tree's leaves, a little wind
+    loop(b, 'dusk_crickets', 65.5, 75.3, gain=-19, fin=0.8, fout=0.9, hp=200, lp=10000)
+    loop(b, 'tree_leaves', 65.5, 75.3, gain=-15, fin=0.8, fout=0.9, pan=-0.25, hp=150)
+    loop(b, 'breeze', 65.5, 75.3, gain=-21, fin=0.8, fout=0.9, hp=100)
+    # 11 ending: the field again, quieter; everything goes with the last ring (then silence)
+    loop(b, 'field_morning', 74.5, 82.4, gain=-15, fin=0.9, fout=0.9, hp=80, lp=8000)
+    loop(b, 'breeze', 74.5, 82.4, gain=-20, fin=0.9, fout=0.9, hp=100)
 
 
-def spots(b, big):
-    # ---- 1 classroom: the ticking clock, a pencil, a chair, a yawn, a bored sigh
+def spots(b, big, crowd):
+    # ---- 1 classroom: the wall clock (above the board, left), a big stretching yawn at the back,
+    # a yawn behind a hand at the front, the bored boy's sigh, a chair creak
     for s in range(1, 6):
-        tick(b, s)
-    for s in (6, 7):  # outside now: the school's own clock, distant
-        tick(b, s, gain=-13, lp=1800)
-    put(b, 'pencil_scratch', 0.25, dur=4.6, gain=-15, fout=0.6, pan=-0.2)
-    put(b, 'kid_yawn', 0.7, gain=-8, pan=0.35, fout=0.4)
-    put(b, 'chair_creak', 1.0, dur=0.9, gain=-11, pan=0.35, fout=0.2)
-    put(b, 'kid_yawn', 1.45, gain=-11, pan=-0.45, pitch=1.1, fout=0.4)
-    put(b, 'bored_sigh', 1.5, gain=-5, pan=0.25, fout=0.5)
-    # ---- 2 the pop: a soft airy whoosh-pop (peak on POP), the ring, then paper fluttering
-    put(big, 'pop_whoosh', POP - 0.47, gain=1, fout=0.4)
-    put(b, 'ring_whoosh', POP - 0.2, gain=-9, fout=0.5)
-    put(b, 'paper_flutter', POP + 0.1, gain=-4, fin=0.1, fout=1.6, width=1.3)
-    # soft cartoon landings on the grass, one thump per kid
-    segs = [0.24, 0.42, 0.60, 0.77, 0.93, 1.09, 1.25]
-    for k, tl in enumerate(sorted(land_times())):
-        put(b, 'soft_thumps', tl - 0.03, start=segs[k], dur=0.2, gain=-5, fout=0.08, pan=(k - 3) * 0.12)
-    # ---- 3 confusion: a few "huh?"s and someone getting up off the grass
-    put(b, 'huh', 12.3, start=0.25, dur=1.0, gain=-8, pan=-0.3, fout=0.2)
-    put(b, 'huh', 14.05, start=3.15, dur=0.85, gain=-9, pan=0.35, fout=0.2)
-    put(b, 'huh', 15.7, start=0.25, dur=1.0, gain=-11, pan=0.1, pitch=1.08, fout=0.2)
-    for t0, pan in ((13.0, -0.1), (13.5, 0.05), (14.4, 0.3), (15.4, -0.25)):
-        put(b, 'footsteps_grass', t0, start=0.3, dur=0.6, gain=-15, pan=pan, fout=0.2)
-    # ---- 4 celebration: cheering, laughing, clapping and stomping, a high five, papers thrown
-    put(b, 'kids_cheer', 18.55, gain=-4, fin=0.15, fout=1.2, width=1.2)
-    put(b, 'kids_laugh', 20.6, gain=-10, fout=1.0, pan=0.2)
-    loop(b, 'clap_stomp', 19.2, 27.0, gain=-9, fin=0.3, fout=0.9)
-    put(b, 'high_five', 19.6 - 0.05, gain=-4)
-    for k, x in enumerate(THROWS):
-        put(b, 'papers_toss', x - 0.3, start=1.2, dur=1.6, gain=-8, fout=0.5, pan=0.25 - k * 0.1)
-    # a paper flies at the camera (into the montage)
-    put(b, 'paper_flutter', 26.8, start=0.3, dur=1.0, gain=-8, fin=0.1, fout=0.4)
-    put(b, 'ring_whoosh', 26.95, gain=-13, fout=0.4)
-    # ---- 5 montage: sleeping in (a snore), the park (swing creak, paper plane), the backpack
-    put(b, 'snore', 27.75, dur=3.2, gain=-10, fin=0.2, fout=0.8)
-    put(b, 'swing_creak', 28.05, gain=-12, pan=-0.3, fin=0.3, fout=0.8)
-    loop(b, 'swing_creak', 28.05, 34.0, gain=-14, pan=-0.3, fin=0.3, fout=0.8)
-    put(b, 'paper_rustle', 29.0, gain=-13, pan=-0.3)
-    put(b, 'ring_whoosh', BAG_THROW - 0.3, gain=-16, pitch=1.3, pan=0.35, fout=0.3)
-    put(b, 'paper_flutter', BAG_THROW + 0.05, dur=1.3, gain=-13, pan=0.35, fout=0.5)
-    put(b, 'backpack_thud', 29.86 - 0.25, gain=-6, pan=0.45)
-    put(b, 'ring_whoosh', 34.05, gain=-14, fout=0.4)
-    # ---- 6 globe: paper rustle and soft ticks as the school dots go out
-    put(b, 'paper_rustle', 34.25, gain=-9)
-    put(b, 'soft_ticks', 35.15, dur=1.1, gain=-12, fout=0.3)
-    loop(b, 'soft_ticks', 37.3, 40.5, xfade=0.3, gain=-10, fin=0.2, fout=0.5)
-    put(b, 'paper_rustle', 36.3, gain=-15, pitch=0.92)
-    put(b, 'paper_rustle', 40.6, gain=-15, pitch=1.06)
-    put(b, 'paper_rustle', 41.9, gain=-11)
-    # ---- 7 curb: calendar ticks, sighs, a single ball bouncing away (nobody chases it)
-    put(b, 'soft_ticks', 43.0, dur=3.0, gain=-18, fout=0.4)
-    put(b, 'bored_sigh', 44.35, gain=-11, pitch=1.12, pan=0.05)
-    put(b, 'ball_bounce', BALL_T - 0.16, dur=2.4, gain=-5, fout=0.9, pan_auto=[(BALL_T, -0.45), (BALL_T + 2.4, 0.75)])
-    put(b, 'bored_sigh', 46.2, gain=-11, pan=-0.15)
-    # ---- 8 literacy: paper rustle and ticks while the bars draw and fill; letters tumble
-    put(b, 'paper_rustle', 50.35, gain=-9)
-    put(b, 'soft_ticks', 51.5, dur=1.0, gain=-11, fout=0.3)
-    put(b, 'soft_ticks', 52.7, start=1.0, dur=1.2, gain=-11, fout=0.3)
-    put(b, 'ring_whoosh', 53.75, gain=-15, fout=0.4)
-    put(b, 'paper_rustle', 55.35, gain=-12, pan=-0.1)
-    put(b, 'paper_rustle', 56.15, gain=-13, pan=0.1, pitch=0.9)
-    loop(b, 'soft_ticks', 54.95, 58.2, xfade=0.3, gain=-19, fin=0.3, fout=0.6)
-    # ---- 9 future: each panel lands with a paper rustle; the cockpit inset
-    for t0 in (58.3, 60.25, 61.6):
-        put(b, 'paper_rustle', t0, gain=-11)
-    put(b, 'ring_whoosh', 62.25, gain=-15, fout=0.4)
-    # ---- 10 sad: friends' footsteps fading away, one sigh
-    put(b, 'footsteps_grass', 68.4, gain=-17, fin=0.5, fout=1.5, pan=0.25, lp=4000)
-    put(b, 'bored_sigh', 72.95, gain=-10, pitch=0.96)
-    # ---- 11 ending: the same clock tick returns, chalk dust blows away, a last ring, silence
-    for s in range(77, 82):
-        tick(b, s)
-    put(b, 'paper_flutter', 78.4, dur=1.5, gain=-17, fin=0.3, fout=0.6, lp=6000)
-    t_ring = max(79.772 + 1.75, 81.4)
-    put(big, 'ring_whoosh', t_ring - 0.49, gain=-4, fout=0.6)
+        tick(b, s, pan=-0.3, verb=ROOM)
+    put(b, 'boy_yawn', 0.62, pitch=1.1, gain=-16, pan=0.3, lp=7000, fout=0.4, verb=ROOM)
+    put(b, 'boy_yawn', 1.55, start=0.1, dur=1.9, pitch=0.97, gain=-21, pan=-0.55, lp=2200, fout=0.5, verb=ROOM)
+    put(b, 'boy_sigh', 3.3, gain=-5, pan=0.35, fout=0.5, verb=ROOM)
+    put(b, 'chair_creak', 4.35, dur=1.0, gain=-14, pan=-0.2, fout=0.25, verb=ROOM)
+    # the camera leaves through the window: a soft breath of air
+    put(b, 'air_swish', 5.0, pitch=0.8, gain=-19, fout=0.3)
+    # ---- 2 the pop. The school's own clock ticks far off until the school is gone.
+    for s in (6, 7):
+        tick(b, s, gain=-17, lp=2200, pan=0.0, verb=FIELD)
+    # air drawn in as the blue dot swells, the soft deep whoomp on the pop, then a gust carrying
+    # the dust away to the right
+    put(big, 'vanish_whoomp', POP - 0.97, gain=0, fin=0.2, fout=0.6)
+    put(b, 'dust_gust', POP + 0.02, gain=-6, fin=0.08, fout=0.9, width=1.3, pan_auto=[(POP, -0.1), (POP + 2.6, 0.4)])
+    # the kids, hanging in the air, gasp (far: wide shot)
+    put(b, 'kids_gasp', POP + 0.16, gain=-8, lp=7000, fout=0.4, verb=FIELD)
+    # soft landings on the grass, one per kid, where each one lands
+    for k, (tl, x) in enumerate(FALLS):
+        landing(b, tl, pan_x(x, z=1.03), gain=-11 + (k % 3), pitch=(0.94, 1.0, 1.07)[k % 3], alt=k % 2 == 1)
+    put(b, 'kid_oof', FALLS[0][0] - 0.22, gain=-10, pan=pan_x(292, z=1.03), lp=8000, fout=0.3, verb=FIELD)
+    # ---- 3 confusion: quiet murmurs that grow as the camera pushes in, kids getting up off the
+    # grass, a "what?" and a "huh?" on two of the shrugs (after the narration line)
+    put(b, 'kids_murmur', 10.3, start=4.6, dur=3.4, gain=-15, fin=0.9, fout=0.6, lp=6000, verb=FIELD)
+    put(b, 'kids_murmur', 13.1, start=0.3, dur=3.1, gain=-14, fin=0.5, fout=0.6, lp=7000, verb=FIELD)
+    put(b, 'kids_murmur', 15.6, start=4.6, dur=3.2, pitch=1.03, gain=-11, fin=0.5, fout=0.8, verb=FIELD)
+    for t0, x, st in ((13.0, 452, 0.3), (13.5, 548, 1.0), (14.4, 738, 1.8), (15.4, 338, 2.6)):
+        put(b, 'grass_steps', t0 + 0.1, start=st, dur=0.7, gain=-16, fin=0.05, fout=0.25, pan=pan_x(x, z=1.95, k=0.6))
+    put(b, 'boy_what', 15.6, gain=-7, pan=pan_x(738, z=1.95, k=0.6), fout=0.2, verb=FIELD)
+    put(b, 'girl_huh', 16.62, gain=-8, pan=pan_x(338, z=1.95, k=0.6), fout=0.2, verb=FIELD)
+    # ---- 4 celebration (crowd bus: it drops back while the camera is on the teachers)
+    put(crowd, 'kids_cheer', 18.42, gain=-4, fin=0.12, fout=1.0, width=1.25, verb=FIELD, auto=[(18.4, 0), (18.68, 0), (19.0, -4), (30, -4)])
+    put(crowd, 'kids_run', 18.8, start=0.1, dur=0.65, gain=-13, fout=0.15, pan=-0.1)
+    put(crowd, 'girl_yay', TOSS - 0.05, gain=-10, pan=pan_x(642, z=1.95, k=0.6), fout=0.2, verb=FIELD)
+    put(crowd, 'high_five', HF_APEX - 0.35, gain=-4, pan=pan_x(500, z=1.95, k=0.6), verb=FIELD)
+    for i, tl in enumerate(HF_LAND):
+        hop(crowd, tl, pan_x(500 + (i * 2 - 1) * 35, z=1.95, k=0.6), gain=-11, alt=i == 1)
+    put(crowd, 'kid_wheee', 20.15, gain=-9, pan=pan_x(338, z=1.95, k=0.6), fout=0.3, verb=FIELD)
+    put(crowd, 'kids_laugh', 20.35, gain=-12, fin=0.1, fout=0.8, pan=-0.05, verb=FIELD)
+    put(crowd, 'kids_clap', 19.4, gain=-13, fout=0.5, pan=pan_x(738, z=1.95, k=0.6), verb=FIELD)
+    put(crowd, 'kids_clap', 22.3, start=0.2, gain=-17, fout=0.6, pan=0.35, verb=FIELD)
+    loop(crowd, 'grass_steps_alt', 19.2, 27.3, gain=-20, fin=0.4, fout=0.6, pan=0.1)
+    put(crowd, 'kids_laugh_alt', 23.9, gain=-12, fin=0.3, fout=1.0, pan=0.1, verb=FIELD)
+    put(crowd, 'kids_cheer_alt', 25.1, start=1.0, dur=3.0, gain=-9, fin=0.4, fout=0.9, width=1.2, verb=FIELD)
+    for i, tl in enumerate(K0_LAND):
+        hop(crowd, tl, -0.6, gain=-12 - (i % 2), alt=i % 2 == 1)
+    for i, tl in enumerate(K2_LAND):
+        hop(crowd, tl, -0.1, gain=-13, alt=i % 2 == 0)
+    # the teachers aren't smiling: a tut and a groan once the narrator has said so
+    put(b, 'woman_tsk', 23.33, gain=-7, pan=pan_x(790, cx=712, z=2.25, k=0.6), fout=0.2, verb=FIELD)
+    put(b, 'man_groan', 24.1, gain=-9, pan=pan_x(676, cx=712, z=2.25, k=0.6), fout=0.3, verb=FIELD)
+    # into the montage (the blue dot opens a circle onto it)
+    put(b, 'air_swish', 26.95, gain=-14, fout=0.3)
+    # ---- 5 montage: the sleeper snores (again right after "No alarms"), the swing creaks at the
+    # bottom of each swing, the park kid's jumps, the backpack flung away and landing in the grass
+    put(b, 'snore', 27.75, dur=1.3, gain=-15, fin=0.1, fout=0.4, verb=(0.4, -16))
+    put(b, 'snore', 31.05, start=2.4, gain=-10, fin=0.1, fout=0.4, verb=(0.4, -16))
+    for i, tb in enumerate(SWING_BOTTOM):
+        st, pk = ((0.0, 0.16), (1.45, 1.76), (2.5, 2.82))[i % 3]
+        put(b, 'swing_chains', tb - (pk - st), start=st, dur=0.8, gain=-16, fin=0.05, fout=0.3, pan=-0.45, verb=PARK)
+    for i, tl in enumerate(PARK_LAND):
+        hop(b, tl, -0.35, gain=-18, alt=i % 2 == 1, lp=6000, verb=PARK)
+    put(b, 'air_swish', BAG_THROW - 0.15, pitch=0.82, gain=-12, fout=0.3, pan_auto=[(BAG_THROW, 0.25), (BAG_LAND, 0.6)])
+    put(b, 'backpack_land', BAG_LAND - 0.1, gain=-11, pan=0.6, fout=0.3, verb=PARK)
+    hop(b, BAG_KID_LAND[1], 0.4, gain=-15, verb=PARK)
+    # into the globe
+    put(b, 'air_swish', 34.2, gain=-15, fout=0.3)
+    # ---- 6 globe: the school dots scatter on like seeds, then go out in three waves, each a soft
+    # puff (like blowing out candles), moving east to west
+    put(b, 'sand_trickle', 35.15, start=0.6, dur=1.2, gain=-22, hp=1500, fin=0.2, fout=0.5, width=1.4)
+    for i, tw in enumerate(WAVES):
+        put(b, 'candle_puff', tw - 0.15, pitch=(1.0, 0.94, 0.88)[i], gain=(-12, -13, -14)[i], pan=(0.35, 0.0, -0.35)[i], fout=0.3)
+    # ---- 7 curb: a car passes far off, the calendar inset, the ball nudged and rolling away along
+    # the gutter (nobody chases it), two sighs, a dog barking far away
+    put(b, 'car_far', 42.4, gain=-18, lp=5000, fin=0.5, fout=0.8, pan_auto=[(42.4, -0.6), (47.4, 0.6)])
+    put(b, 'air_swish', 42.6, gain=-18, pan=-0.4, fout=0.3)
+    xs = lambda t: 222 + (320 / 0.3) * (1 - np.exp(-0.3 * max(0.0, t - BALL_T)))
+    put(b, 'ball_roll', BALL_T - 0.03, gain=-9, fout=0.6, verb=STREET,
+        pan_auto=[(BALL_T + a, pan_x(xs(BALL_T + a))) for a in np.arange(0, 4.2, 0.2)])
+    put(b, 'boy_sigh_alt', 46.38, gain=-9, pan=pan_x(396), fout=0.4, verb=STREET)
+    put(b, 'girl_sigh', 47.55, gain=-8, pan=pan_x(566), fout=0.4, verb=STREET)
+    put(b, 'dog_far', 48.75, gain=-18, lp=4000, pan=0.5, verb=STREET)
+    # ---- 8 literacy: the bar frames swish on; each bar fills like sand pouring in; the Today bar
+    # drains like sand running out; the puzzled kid's "hmm" once the line is over
+    put(b, 'air_swish', 50.3, gain=-15, fout=0.3)
+    put(b, 'sand_trickle', 51.5, start=1.0, dur=1.1, gain=-17, fin=0.12, fout=0.3, pan=-0.4)
+    put(b, 'sand_trickle', 52.7, start=1.5, dur=1.35, gain=-16, fin=0.12, fout=0.3, pan=0.15)
+    put(b, 'air_swish', 53.75, gain=-18, pan=-0.1, fout=0.3)
+    put(b, 'sand_trickle', T_SLIDE + 0.15, pitch=0.9, gain=-16, fin=0.4, fout=0.9, lp=6000, pan=0.15)
+    put(b, 'boy_hmm', 57.98, gain=-9, pan=-0.13, fout=0.25, verb=STREET)
+    # ---- 9 future: each panel slides onto the page with a soft swish; a door closes far down the
+    # empty corridor; the crane's hook creaks as it swings
+    for t0 in PANELS:
+        put(b, 'air_swish', t0 + 0.2 - 0.4, gain=-17, fout=0.3)
+    put(b, 'air_swish', INSET9 + 0.15 - 0.4, pitch=1.15, gain=-18, pan=-0.45, fout=0.3)
+    put(b, 'door_far', 59.95, gain=-13, pan=0.2, fout=0.5)
+    put(b, 'crane_creak', 63.65, dur=1.4, gain=-15, pan=-0.4, fout=0.4)
+    # ---- 10 sad: the friends' footsteps walking away, fading; the kid sniffles, then sighs
+    put(b, 'steps_away_gravel', FRIENDS_GO[0], gain=-14, fin=0.2, fout=1.2, pan_auto=[(68.15, 0.3), (73.0, 0.05)], lp=6000, verb=PARK)
+    put(b, 'steps_away_gravel', FRIENDS_GO[1] + 0.1, start=1.1, pitch=1.06, gain=-16, fin=0.2, fout=1.0, pan_auto=[(68.65, 0.5), (72.5, 0.75)], lp=5000, verb=PARK)
+    put(b, 'boy_sniffle', 71.85, gain=-10, pan=-0.32, fout=0.3, verb=PARK)
+    put(b, 'boy_sigh', 73.12, pitch=0.97, gain=-8, pan=-0.32, fout=0.5, verb=PARK)
+    # ---- 11 ending: the same sigh, the same clock ticking again (a memory: the classroom's room
+    # sound), the chalk board blowing away as dust, a last ring and its breath of air, then silence
+    put(b, 'boy_sigh', 75.3, gain=-16, pan=0.35, fout=0.5, verb=ROOM)
+    for s in range(76, 82):
+        tick(b, s, gain=-12, pan=-0.3, verb=ROOM)
+    put(b, 'dust_gust', T_ERASE - 0.1, gain=-15, lp=5000, fin=0.2, fout=0.9, pan_auto=[(T_ERASE, -0.45), (T_ERASE + 2.4, 0.2)])
+    put(big, 'breath_whoosh', T_RING - 0.35, gain=-5, fout=0.6)
 
 
 def lufs(path):
@@ -296,15 +436,23 @@ def main():
     bed = Bus(LEN)
     fx = Bus(LEN)
     big = Bus(LEN)
+    crowd = Bus(LEN)
     beds(bed)
-    spots(fx, big)
+    spots(fx, big, crowd)
+    # the celebrating kids drop back (and lose a little top end) while the camera is on the teachers
+    crowd.x *= curve(len(crowd.x), 0.0, [(0, 0), (21.6, 0), (22.4, -5), (24.9, -5), (25.6, 0), (LEN, 0)])[:, None]
+    fx.x += crowd.x
     sfx = bed.x + fx.x + big.x
     master(sfx.copy(), os.path.join(ROOT, 'output/school_sfx.wav'))
 
     v = voice_track(timing)
     act = speech_activity(timing)
     duck = db(-DUCK_DB * act)[:, None]
-    under = (bed.x + fx.x + big.x) * db(VO_FX_GAIN) * duck
+    rides = [(0, 0)]
+    for t0, t1, g in VO_RIDES:
+        rides += [(t0 - 0.15, 0), (t0, g), (t1, g), (t1 + 0.25, 0)]
+    rides.append((LEN, 0))
+    under = (bed.x + fx.x + big.x) * db(VO_FX_GAIN) * duck * curve(len(duck), 0.0, rides)[:, None]
     vr = np.sqrt((v[np.abs(v) > 1e-4] ** 2).mean())
     v = v / (vr + 1e-12) * db(-16)
     under = ceiling(under, v, act)

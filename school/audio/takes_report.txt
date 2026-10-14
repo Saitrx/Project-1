@@ -1,0 +1,168 @@
+air_swish_a: score   0.00  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.95  spikes 20.4  silent 0.19  clip 0.0000
+air_swish_b: score -19.85  len  1.0s  f0     0Hz voiced 0.00  tonal 0.116  steady 5.18  spikes 35.8  silent 0.43  clip 0.0449
+  -> air_swish: take a
+backpack_land_a: score   1.65  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.69  spikes 35.1  silent 0.38  clip 0.0000
+backpack_land_b: score   1.57  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.24  spikes 36.1  silent 0.43  clip 0.0000
+  -> backpack_land: take a
+ball_asphalt_a: score  -4.60  len  4.0s  f0     0Hz voiced 0.00  tonal 0.163  steady 5.72  spikes 51.3  silent 0.83  clip 0.0008
+ball_asphalt_b: score  -1.17  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 6.21  spikes 49.9  silent 0.73  clip 0.0000
+  -> ball_asphalt: take b
+boy_hmm_a: score   5.38  len  1.0s  f0   407Hz voiced 1.00  tonal 0.000  steady 1.92  spikes 3.2  silent 0.05  clip 0.0000
+boy_hmm_b: score   3.79  len  1.0s  f0   274Hz voiced 1.00  tonal 0.000  steady 1.51  spikes 8.7  silent 0.13  clip 0.0000
+  -> boy_hmm: take a
+boy_sigh_a: score   1.58  len  2.0s  f0   353Hz voiced 1.00  tonal 0.000  steady 0.98  spikes 13.7  silent 0.08  clip 0.0079
+boy_sigh_b: score  -3.62  len  2.0s  f0   290Hz voiced 1.00  tonal 0.000  steady 1.32  spikes 5.1  silent 0.10  clip 0.0190
+  -> boy_sigh: take a
+boy_sniffle_a: score   2.69  len  2.0s  f0   222Hz voiced 0.09  tonal 0.000  steady 2.03  spikes 19.1  silent 0.36  clip 0.0000
+boy_sniffle_b: score   4.35  len  2.0s  f0   358Hz voiced 0.10  tonal 0.000  steady 2.00  spikes 28.2  silent 0.11  clip 0.0000
+  -> boy_sniffle: take b
+boy_what_a: score   3.53  len  1.0s  f0   527Hz voiced 1.00  tonal 0.056  steady 2.51  spikes 9.4  silent 0.26  clip 0.0046
+boy_what_b: score  -6.27  len  1.0s  f0   294Hz voiced 0.91  tonal 0.000  steady 3.60  spikes 16.7  silent 0.33  clip 0.0256
+  -> boy_what: take a
+boy_yawn_a: score   3.47  len  2.5s  f0   289Hz voiced 0.70  tonal 0.058  steady 0.94  spikes 12.8  silent 0.11  clip 0.0004
+boy_yawn_b: score  -0.32  len  2.5s  f0   286Hz voiced 0.87  tonal 0.000  steady 0.83  spikes 14.8  silent 0.17  clip 0.0104
+  -> boy_yawn: take a
+breath_whoosh_a: score  -9.36  len  2.5s  f0     0Hz voiced 0.00  tonal 0.424  steady 2.65  spikes 28.3  silent 0.32  clip 0.0000
+breath_whoosh_b: score  -7.35  len  2.5s  f0     0Hz voiced 0.00  tonal 0.340  steady 3.00  spikes 29.2  silent 0.38  clip 0.0000
+  -> breath_whoosh: take b
+breeze_a: score  -6.73  len 12.0s  f0     0Hz voiced 0.00  tonal 0.215  steady 3.08  spikes 9.4  silent 0.00  clip 0.0000
+breeze_b: score -17.55  len 12.0s  f0     0Hz voiced 0.00  tonal 0.634  steady 2.85  spikes 15.5  silent 0.00  clip 0.0000
+  -> breeze: take a
+bridge_wind_a: score  -2.59  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.65  spikes 12.0  silent 0.00  clip 0.0016
+bridge_wind_b: score  -1.65  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.56  spikes 9.0  silent 0.00  clip 0.0000
+  -> bridge_wind: take b
+candle_puff_a: score   0.60  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.63  spikes 11.9  silent 0.14  clip 0.0000
+candle_puff_b: score   0.88  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.52  spikes 17.5  silent 0.30  clip 0.0000
+  -> candle_puff: take b
+car_far_a: score  -0.01  len  5.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.00  spikes 15.2  silent 0.12  clip 0.0000
+car_far_b: score  -0.32  len  5.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.07  spikes 16.0  silent 0.13  clip 0.0008
+  -> car_far: take a
+chair_creak_a: score   1.36  len  1.5s  f0     0Hz voiced 0.00  tonal 0.000  steady 4.28  spikes 27.3  silent 0.29  clip 0.0000
+chair_creak_b: score   1.47  len  1.5s  f0     0Hz voiced 0.00  tonal 0.000  steady 6.44  spikes 37.9  silent 0.49  clip 0.0000
+  -> chair_creak: take b
+classroom_tone_a: score -17.36  len 12.0s  f0     0Hz voiced 0.00  tonal 0.658  steady 2.76  spikes 6.2  silent 0.00  clip 0.0000
+classroom_tone_b: score  -1.90  len 12.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.31  spikes 6.4  silent 0.00  clip 0.0000
+  -> classroom_tone: take b
+clock_tick_a: score  -6.39  len  1.0s  f0     0Hz voiced 0.00  tonal 0.331  steady 4.15  spikes 44.3  silent 0.82  clip 0.0000
+clock_tick_b: score   1.42  len  1.0s  f0     0Hz voiced 0.00  tonal 0.001  steady 3.36  spikes 39.0  silent 0.53  clip 0.0000
+  -> clock_tick: take b
+crane_creak_a: score   0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 4.44  spikes 10.3  silent 0.04  clip 0.0000
+crane_creak_b: score  -0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.81  spikes 10.8  silent 0.10  clip 0.0000
+  -> crane_creak: take a
+dog_far_a: score  -0.49  len  2.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.24  spikes 40.0  silent 0.51  clip 0.0000
+dog_far_b: score  -0.13  len  2.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.29  spikes 21.8  silent 0.24  clip 0.0003
+  -> dog_far: take b
+door_far_a: score -12.86  len  2.0s  f0     0Hz voiced 0.00  tonal 0.193  steady 3.36  spikes 32.8  silent 0.41  clip 0.0269
+door_far_b: score -27.40  len  2.0s  f0     0Hz voiced 0.00  tonal 0.216  steady 3.38  spikes 35.9  silent 0.46  clip 0.0617
+  -> door_far: take a
+dusk_crickets_a: score  -0.32  len 12.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 0.38  spikes 1.2  silent 0.00  clip 0.0000
+dusk_crickets_b: score  -2.40  len 12.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.52  spikes 3.6  silent 0.00  clip 0.0000
+  -> dusk_crickets: take a
+dust_gust_a: score  -6.98  len  3.0s  f0     0Hz voiced 0.00  tonal 0.317  steady 2.86  spikes 19.9  silent 0.09  clip 0.0007
+dust_gust_b: score   0.00  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.61  spikes 16.4  silent 0.11  clip 0.0000
+  -> dust_gust: take b
+field_morning_a: score  -1.35  len 15.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 0.49  spikes 13.3  silent 0.00  clip 0.0000
+field_morning_b: score  -1.87  len 15.0s  f0     0Hz voiced 0.00  tonal 0.080  steady 0.65  spikes 9.3  silent 0.00  clip 0.0000
+  -> field_morning: take a
+flag_flap_a: score  -2.98  len  6.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.68  spikes 16.5  silent 0.00  clip 0.0001
+flag_flap_b: score  -3.20  len  6.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.20  spikes 14.3  silent 0.00  clip 0.0003
+  -> flag_flap: take a
+garden_birds_a: score  -3.53  len 12.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.63  spikes 16.9  silent 0.02  clip 0.0000
+garden_birds_b: score  -3.85  len 12.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.37  spikes 22.2  silent 0.15  clip 0.0001
+  -> garden_birds: take a
+girl_huh_a: score  -4.35  len  1.0s  f0   345Hz voiced 1.00  tonal 0.000  steady 1.57  spikes 11.0  silent 0.25  clip 0.0225
+girl_huh_b: score  -1.49  len  1.0s  f0   304Hz voiced 1.00  tonal 0.000  steady 2.12  spikes 46.1  silent 0.53  clip 0.0128
+  -> girl_huh: take b
+girl_sigh_a: score   1.70  len  2.0s  f0   274Hz voiced 0.94  tonal 0.132  steady 1.01  spikes 11.9  silent 0.23  clip 0.0000
+girl_sigh_b: score   4.17  len  2.0s  f0   308Hz voiced 0.96  tonal 0.000  steady 1.15  spikes 9.5  silent 0.05  clip 0.0000
+  -> girl_sigh: take b
+girl_yay_a: score   5.54  len  1.0s  f0   536Hz voiced 1.00  tonal 0.000  steady 1.64  spikes 4.5  silent 0.07  clip 0.0000
+girl_yay_b: score -10.45  len  1.0s  f0   431Hz voiced 1.00  tonal 0.000  steady 1.36  spikes 10.3  silent 0.10  clip 0.0400
+  -> girl_yay: take a
+grass_steps_a: score   0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.14  spikes 9.0  silent 0.00  clip 0.0000
+grass_steps_b: score   0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 4.17  spikes 11.4  silent 0.00  clip 0.0000
+  -> grass_steps: take a
+grass_thud_a: score -16.01  len  1.0s  f0     0Hz voiced 0.00  tonal 0.714  steady 3.71  spikes 53.9  silent 0.68  clip 0.0027
+grass_thud_b: score -10.30  len  1.0s  f0     0Hz voiced 0.00  tonal 0.498  steady 2.66  spikes 18.1  silent 0.03  clip 0.0000
+  -> grass_thud: take b
+hall_air_a: score -10.82  len 10.0s  f0     0Hz voiced 0.00  tonal 0.415  steady 2.02  spikes 6.2  silent 0.00  clip 0.0000
+hall_air_b: score -12.52  len 10.0s  f0     0Hz voiced 0.00  tonal 0.469  steady 2.58  spikes 6.1  silent 0.00  clip 0.0000
+  -> hall_air: take a
+high_five_a: score   1.46  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 4.28  spikes 57.5  silent 0.74  clip 0.0006
+high_five_b: score   1.46  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.38  spikes 61.6  silent 0.81  clip 0.0003
+  -> high_five: take a
+hop_thump_a: score   1.64  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.08  spikes 32.8  silent 0.09  clip 0.0000
+hop_thump_b: score   1.82  len  1.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.89  spikes 36.4  silent 0.27  clip 0.0000
+  -> hop_thump: take b
+hospital_corridor_a: score -20.03  len 10.0s  f0     0Hz voiced 0.00  tonal 0.798  steady 1.61  spikes 4.5  silent 0.00  clip 0.0000
+hospital_corridor_b: score -18.90  len 10.0s  f0     0Hz voiced 0.00  tonal 0.758  steady 1.47  spikes 3.9  silent 0.00  clip 0.0000
+  -> hospital_corridor: take b
+kid_oof_a: score   5.54  len  1.5s  f0   539Hz voiced 1.00  tonal 0.000  steady 5.31  spikes 28.4  silent 0.24  clip 0.0000
+kid_oof_b: score   5.19  len  1.5s  f0   500Hz voiced 0.31  tonal 0.000  steady 2.40  spikes 16.1  silent 0.03  clip 0.0000
+  -> kid_oof: take a
+kid_wheee_a: score  -4.17  len  1.5s  f0   530Hz voiced 1.00  tonal 0.000  steady 1.13  spikes 8.0  silent 0.07  clip 0.0243
+kid_wheee_b: score -10.59  len  1.5s  f0   539Hz voiced 1.00  tonal 0.384  steady 1.17  spikes 5.7  silent 0.10  clip 0.0195
+  -> kid_wheee: take a
+kids_cheer_a: score   0.72  len  5.0s  f0   343Hz voiced 0.98  tonal 0.000  steady 0.95  spikes 5.2  silent 0.05  clip 0.0097
+kids_cheer_b: score   2.01  len  5.0s  f0   464Hz voiced 0.99  tonal 0.000  steady 1.04  spikes 5.3  silent 0.05  clip 0.0088
+  -> kids_cheer: take b
+kids_clap_a: score  -5.21  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.36  spikes 9.1  silent 0.11  clip 0.0130
+kids_clap_b: score  -3.80  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.26  spikes 7.5  silent 0.07  clip 0.0095
+  -> kids_clap: take b
+kids_gasp_a: score  -0.35  len  2.0s  f0   334Hz voiced 0.98  tonal 0.000  steady 1.09  spikes 9.6  silent 0.09  clip 0.0121
+kids_gasp_b: score   3.80  len  2.0s  f0   436Hz voiced 1.00  tonal 0.000  steady 1.05  spikes 4.8  silent 0.16  clip 0.0043
+  -> kids_gasp: take b
+kids_laugh_a: score   3.57  len  5.0s  f0   487Hz voiced 0.90  tonal 0.000  steady 4.31  spikes 24.4  silent 0.16  clip 0.0048
+kids_laugh_b: score   4.43  len  5.0s  f0   505Hz voiced 1.00  tonal 0.000  steady 3.30  spikes 14.9  silent 0.05  clip 0.0028
+  -> kids_laugh: take b
+kids_murmur_a: score   4.39  len  8.0s  f0   324Hz voiced 0.99  tonal 0.000  steady 1.46  spikes 18.9  silent 0.00  clip 0.0000
+kids_murmur_b: score   5.38  len  8.0s  f0   407Hz voiced 1.00  tonal 0.000  steady 1.35  spikes 16.7  silent 0.00  clip 0.0000
+  -> kids_murmur: take b
+kids_run_a: score  -4.01  len  3.0s  f0     0Hz voiced 0.00  tonal 0.210  steady 3.59  spikes 17.9  silent 0.07  clip 0.0000
+kids_run_b: score   0.00  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.65  spikes 22.6  silent 0.00  clip 0.0000
+  -> kids_run: take b
+leaves_skitter_a: score  -3.59  len  4.0s  f0     0Hz voiced 0.00  tonal 0.194  steady 3.62  spikes 17.7  silent 0.00  clip 0.0000
+leaves_skitter_b: score  -3.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.170  steady 3.81  spikes 15.9  silent 0.00  clip 0.0000
+  -> leaves_skitter: take b
+light_flicker_a: score   0.00  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.45  spikes 2.3  silent 0.01  clip 0.0000
+light_flicker_b: score  -0.00  len  3.0s  f0     0Hz voiced 0.00  tonal 0.049  steady 1.42  spikes 2.4  silent 0.05  clip 0.0000
+  -> light_flicker: take a
+man_groan_a: score -34.64  len  1.5s  f0   287Hz voiced 1.00  tonal 0.000  steady 1.45  spikes 4.8  silent 0.15  clip 0.0879
+man_groan_b: score  -3.65  len  1.5s  f0   157Hz voiced 0.79  tonal 0.000  steady 1.26  spikes 5.2  silent 0.07  clip 0.0101
+  -> man_groan: take b
+park_far_kids_a: score -11.44  len 12.0s  f0     0Hz voiced 0.00  tonal 0.386  steady 3.73  spikes 10.1  silent 0.00  clip 0.0000
+park_far_kids_b: score  -6.44  len 12.0s  f0     0Hz voiced 0.00  tonal 0.187  steady 3.33  spikes 12.8  silent 0.00  clip 0.0000
+  -> park_far_kids: take b
+river_a: score  -1.17  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.34  spikes 4.5  silent 0.00  clip 0.0000
+river_b: score  -1.31  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.53  spikes 4.9  silent 0.00  clip 0.0000
+  -> river: take a
+runway_wind_a: score  -2.25  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.28  spikes 11.1  silent 0.00  clip 0.0000
+runway_wind_b: score  -1.57  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.45  spikes 8.8  silent 0.00  clip 0.0000
+  -> runway_wind: take b
+sand_trickle_a: score   0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 0.51  spikes 5.8  silent 0.02  clip 0.0000
+sand_trickle_b: score   0.00  len  4.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 0.89  spikes 5.6  silent 0.01  clip 0.0000
+  -> sand_trickle: take a
+snore_a: score  -0.03  len  4.0s  f0   585Hz voiced 0.68  tonal 0.000  steady 3.69  spikes 15.0  silent 0.27  clip 0.0001
+snore_b: score  -1.79  len  4.0s  f0   549Hz voiced 0.43  tonal 0.109  steady 2.48  spikes 21.3  silent 0.19  clip 0.0008
+  -> snore: take a
+steps_away_gravel_a: score  -0.07  len  5.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.33  spikes 18.7  silent 0.16  clip 0.0002
+steps_away_gravel_b: score  -0.01  len  5.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 4.28  spikes 17.0  silent 0.15  clip 0.0000
+  -> steps_away_gravel: take b
+street_evening_a: score  -1.69  len 15.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.75  spikes 7.9  silent 0.00  clip 0.0000
+street_evening_b: score  -1.83  len 15.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 2.23  spikes 6.1  silent 0.00  clip 0.0000
+  -> street_evening: take a
+swing_chains_a: score  -5.17  len  6.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.92  spikes 34.0  silent 0.38  clip 0.0000
+swing_chains_b: score  -5.54  len  6.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.89  spikes 35.1  silent 0.48  clip 0.0000
+  -> swing_chains: take a
+tree_leaves_a: score  -1.62  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 1.08  spikes 12.2  silent 0.00  clip 0.0000
+tree_leaves_b: score  -1.47  len 10.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 0.74  spikes 12.8  silent 0.00  clip 0.0000
+  -> tree_leaves: take b
+vanish_whoomp_a: score -14.20  len  3.0s  f0     0Hz voiced 0.00  tonal 0.604  steady 3.77  spikes 20.5  silent 0.14  clip 0.0009
+vanish_whoomp_b: score   0.00  len  3.0s  f0     0Hz voiced 0.00  tonal 0.000  steady 3.60  spikes 17.9  silent 0.11  clip 0.0000
+  -> vanish_whoomp: take b
+woman_sigh_a: score  -6.89  len  1.5s  f0   224Hz voiced 0.91  tonal 0.000  steady 1.05  spikes 11.8  silent 0.13  clip 0.0184
+woman_sigh_b: score  -8.02  len  1.5s  f0   276Hz voiced 0.92  tonal 0.000  steady 0.90  spikes 13.5  silent 0.26  clip 0.0212
+  -> woman_sigh: take a
+woman_tsk_a: score  -2.94  len  1.5s  f0   299Hz voiced 0.32  tonal 0.000  steady 4.48  spikes 46.4  silent 0.58  clip 0.0060
+woman_tsk_b: score  -3.08  len  1.5s  f0   378Hz voiced 0.41  tonal 0.000  steady 4.21  spikes 76.8  silent 0.74  clip 0.0028
+  -> woman_tsk: take a

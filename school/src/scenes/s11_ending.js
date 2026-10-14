@@ -63,7 +63,6 @@ export async function build(env) {
   const treeL = treeLayers(S * 1.4, { h: 520, w: 380, seed: 61 });
   const treeR = treeLayers(S * 1.4, { h: 460, w: 340, seed: 67, leaf: '#76a052' });
   const rng = makeRng(1111);
-  const scraps = Array.from({ length: 14 }, () => ({ x: rng.range(170, 930), y: rng.range(1070, 1230), r: rng.range(-1, 1), w: rng.range(10, 20), h: rng.range(7, 13) }));
   // chalk dust: the board blows away (left to right), later the clock and desk go with the ring
   const boardDust = Array.from({ length: 420 }, () => {
     const side = rng.int(0, 4);
@@ -175,7 +174,7 @@ export async function build(env) {
     drawLayer(g, hills[1], 540, 950);
     setCam(g, S, c.x, c.y, c.z);
     drawLayer(g, meadow, 0, 0);
-    // where the school stood: a pale patch of flattened grass, a path leading to nothing, scraps
+    // where the school stood: a pale patch of flattened grass and a path leading to nothing
     g.fillStyle = 'rgba(214,206,160,0.55)';
     g.beginPath();
     g.moveTo(230, 1060);
@@ -195,17 +194,6 @@ export async function build(env) {
     g.lineTo(590, 1010);
     g.closePath();
     g.fill();
-    for (const s of scraps) {
-      g.save();
-      g.translate(s.x, s.y);
-      g.rotate(s.r);
-      g.fillStyle = '#f6efdc';
-      g.fillRect(-s.w / 2, -s.h / 2, s.w, s.h);
-      g.strokeStyle = 'rgba(46,34,25,0.5)';
-      g.lineWidth = 1.6;
-      g.strokeRect(-s.w / 2, -s.h / 2, s.w, s.h);
-      g.restore();
-    }
     drawTree(g, treeL, 40, 1090, t, { scale: 0.62, seed: 1 });
     drawTree(g, treeR, 1050, 1080, t, { scale: 0.58, seed: 2 });
     grassTufts(g, t, { x0: -300, x1: 1400, y: 1250, n: 120, len: [10, 22], seed: 25 });
