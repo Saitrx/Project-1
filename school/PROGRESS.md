@@ -3,22 +3,76 @@
 Project folder: `school/` (Canvas 2D, same pipeline as `dinos/`). Branch: `claude/adoring-thompson-x0mjor`.
 
 ## Status
-**Done.** All outputs are made and verified (`output/VERIFY.md`: every check passes). The PNG
-frames were deleted after verification.
+**v2 done** (after the feedback on v1, see below). Outputs are rebuilt and every `verify.py` check
+passes (`output/VERIFY.md`). The PNG frames were deleted after verification. A 720p H.265 preview
+with the narrated mix is in `preview/school_v2_preview_720p.mp4` (25 MB).
 
 | Output | Result |
 | --- | --- |
-| `output/school_voiceover.mp4` | 67.7 MB. H.264 High 4.2, 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.1 LUFS, true peak -1.6 dBTP. |
-| `output/school_sfx.mp4` | 67.7 MB. Same video. -14.1 LUFS, true peak -1.7 dBTP. |
-| `output/school_master_for_adobe.mp4` | 85.1 MB. Video only, 8 Mbps two-pass. |
-| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.1 LUFS, true peak -1.9 dBTP. |
+| `output/school_voiceover.mp4` | 67.8 MB. H.265 / HEVC Main 4.1 (hvc1), 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.0 LUFS, true peak -1.7 dBTP. |
+| `output/school_sfx.mp4` | 67.8 MB. Same video. -14.3 LUFS, true peak -1.8 dBTP. |
+| `output/school_master_for_adobe.mp4` | 85.3 MB. Video only, H.265 / HEVC Main 4.1 (hvc1), 8 Mbps two-pass. |
+| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.2 / -14.0 LUFS, true peak -2.0 dBTP (-1.7 dBFS after an AAC 320k round trip). |
 
-The first narrated MP4 failed one check: its AAC encode overshot to +1.5 dBTP at 25.0 s and 76.0 s.
-- The mastering now round-trips each mix through AAC 320k and turns down only the spots that would
-  go over, then re-limits.
-- After that, both MP4s measure below -1.5 dBTP.
+## v2: what changed after the feedback on v1
+Your feedback on v1:
+- the sound effects were bad overall;
+- no paper or typing sounds;
+- better environment sounds, and more of them;
+- the kids' voices didn't feel right;
+- papers kept multiplying out of nothing from 13 to 19 s;
+- the school turning into papers was bad;
+- the jumping looked unrealistic;
+- you wanted H.265 instead of H.264.
 
-## Done
+What changed:
+- **Sounds:**
+  - 57 new ElevenLabs sounds, two takes each (`sfx2/`), with the better take picked by measurement
+    (`audio/pick_takes.py`); kids' takes are checked for a child's pitch;
+  - one more (`ball_roll`) because the curb ball rolls and doesn't bounce;
+  - no paper, pencil or ticking-diagram sounds anywhere;
+  - a new mix: every place has its own ambience, and the voices and hits are panned and distanced
+    to where each person is on screen, on the physics times of landings, jumps and the high five
+    (`notes.md` has the full list).
+- **The vanish:** wherever the ring passes, the school crumbles into fine dust in its own colours.
+  A gust carries the dust away and it fades in the air; nothing lands, and no paper.
+- **Papers:** none appear from nothing.
+  - One girl holds her homework sheets from the moment the school vanishes.
+  - At 19.05 s she throws them up once: they fan out above the grown-ups' heads, drift down like
+    leaves and stay on the grass.
+  - The paper plane, the homework sheets in the montage, and the scraps in the ending are gone.
+- **Jumps:** `jumpMotion` gives each jump:
+  - a crouch, an arm swing back, a push-off;
+  - a real ballistic flight (heights vary);
+  - a landing that absorbs the impact in the knees, then recovers, with short pauses between
+    jumps.
+  - The high-five pair run in, jump, and slap at the top of the jump.
+- **Small timing moves so sounds are heard:**
+  - the bored boy's sigh is now just after the opening question (3.4 s);
+  - the curb girl sighs after the ball has rolled past her (47.6 s).
+- **Export:** all three MP4s are now H.265 / HEVC (Main 4.1, `hvc1`), with the same bitrates and
+  size limits.
+
+**QA pass 3 (v2):**
+- low-res frames of the whole film, with 0.1 s sheets of the pop, the celebration, the toss and
+  the montage;
+- then the full-quality frames every 0.5 s.
+
+| Scene | a | b | c | d | e | f | Notes and fixes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 classroom | 9 | 9 | 9 | 9 | 9 | 9 | Ticks on the second hand; the sigh lands after the question. |
+| 2 pop | 9 | 9 | 9 | 9 | 9 | 9 | Dust vanish: the building crumbles where the ring passes and blows away; nothing lands. The kids hang, drop and land, each with its own thump. |
+| 3 confusion | 9 | 9 | 9 | 9 | 9 | 9 | Murmurs grow with the push-in; "what?" and "huh?" on two shrugs, after the line. |
+| 4 celebrate | 9 | 9 | 8→9 | 9 | 9 | 9 | The tossed sheets first hung in front of the teacher's face for about a second. Now they fan out and rise above the grown-ups, then drift down. The jumps and the high five read as real. |
+| 5 montage | 9 | 9 | 9 | 9 | 9 | 9 | The snore returns right after "No alarms"; the swing creaks at the bottom; the backpack lands on its thud. |
+| 6 globe | 9 | 10 | 9 | 9 | 9 | 9 | No ticking; three soft puffs as the waves of dots go out. |
+| 7 curb | 9 | 9 | 9 | 9 | 9 | 9 | The ball rolls (rolling sound, panned along it) and leaves frame at about 48.8 s; the sighs come after it passes. |
+| 8 literacy | 9 | 9 | 9 | 9 | 9 | 9 | The bars fill and drain like sand. |
+| 9 future | 9 | 9 | 9 | 9 | 9 | 9 | The light's buzz follows its flicker; a door down the corridor; the crane creak; the windsock. |
+| 10 sad | 9 | 9 | 9 | 9 | 9 | 9 | Footsteps walking away and fading, a sniffle, a sigh. |
+| 11 ending | 9 | 9 | 9 | 9 | 9 | 9 | No scraps. The ticks return, the board blows away as dust, the last ring, then silence. |
+
+## Done (v1; the v2 changes are above)
 - **References and notes**
   - References saved as `reference_{bee,film,dino}.mp4` (gitignored), with frames in `ref/`.
   - Style breakdown in `notes.md`.
@@ -27,8 +81,8 @@ The first narrated MP4 failed one check: its AAC encode overshot to +1.5 dBTP at
     (`Ovio1nb5Thj5cZeW3MPS`), saved in `vo/`.
   - `audio/vo_prep.py` fits every line inside its scene at speed 1.0, starting about 0.3 s in. It
     writes `out/vo/lineNN.wav` and `src/vo_timing.js`.
-- **Sound effects**: 33 ElevenLabs `eleven_text_to_sound_v2` clips (prompt influence 0.5, loop for
-  beds) in `sfx/`.
+- **Sound effects**: v1 had 33 ElevenLabs `eleven_text_to_sound_v2` clips (prompt influence 0.5, loop
+  for beds); v2 replaced them (see above).
 - **Renderer**: `render.mjs` + `index.html` + `src/film.js` draw at 2160x3840 and downscale with
   Lanczos to 1080x1920 PNG.
   - Paper grain and a moving seeded dither tile prevent banding.
