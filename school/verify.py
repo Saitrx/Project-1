@@ -44,8 +44,9 @@ def video_checks(f, d, v, limit_mb, want_audio, target_kbps=None):
     size = int(d['format']['size'])
     check(f'{f}: size', size < limit_mb * 1e6, f"{size / 1e6:.2f} MB (limit {limit_mb} MB)")
     check(f'{f}: duration', abs(float(d['format']['duration']) - DUR) < 0.05, f"{float(d['format']['duration']):.3f} s")
-    check(f'{f}: codec/profile/level', v['codec_name'] == 'h264' and v['profile'] == 'High' and v['level'] == 42,
-          f"{v['codec_name']} {v['profile']} level {v['level'] / 10:.1f}")
+    # HEVC levels are reported x30 (level 4.1 -> 123); hvc1 is the tag Apple devices and TikTok expect
+    check(f'{f}: codec/profile/level', v['codec_name'] == 'hevc' and v['profile'] == 'Main' and v['level'] == 123 and v.get('codec_tag_string') == 'hvc1',
+          f"{v['codec_name']} {v['profile']} level {v['level'] / 30:.1f}, tag {v.get('codec_tag_string')}")
     check(f'{f}: frame size', (v['width'], v['height']) == (1080, 1920), f"{v['width']}x{v['height']}")
     check(f'{f}: frame rate (CFR)', v['r_frame_rate'] == '30/1' and v['avg_frame_rate'] == '30/1' and int(v.get('nb_frames', 0)) == 2565,
           f"r {v['r_frame_rate']}, avg {v['avg_frame_rate']}, {v.get('nb_frames')} frames")

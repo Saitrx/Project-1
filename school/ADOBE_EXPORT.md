@@ -7,7 +7,7 @@ Adobe Media Encoder. The ready-to-post files are already in `output/` (see `POST
 
 | File | What it is |
 | --- | --- |
-| `output/school_master_for_adobe.mp4` | Picture only. 1080x1920, 30 fps constant, H.264 High 4.2, 8 Mbps two-pass, yuv420p, Rec.709 tags, captions burned in. |
+| `output/school_master_for_adobe.mp4` | Picture only. 1080x1920, 30 fps constant, H.265 / HEVC Main 4.1 (hvc1), 8 Mbps two-pass, yuv420p, Rec.709 tags, closed 2 s GOP, captions burned in. Premiere Pro imports HEVC directly. |
 | `output/school_sfx.wav` | Sound effects only. 48 kHz, 24-bit, stereo, about -14 LUFS, true peak below -1 dBTP. |
 | `output/school_sfx_vo.wav` | Sound effects plus narrator (effects ducked 7 dB under the voice). Same format and loudness. |
 
@@ -39,7 +39,7 @@ In Premiere, **File → Export → Media**, then **Send to Media Encoder**, or s
 Media Encoder directly.
 
 **Format and video**
-- Format: H.264.
+- Format: **HEVC (H.265)**.
 - Preset: Custom (start from "Match Source - Adaptive High Bitrate").
 - Video:
   - Frame size 1080 x 1920.
@@ -47,7 +47,7 @@ Media Encoder directly.
   - Field order Progressive.
   - Aspect Square Pixels (1.0).
   - Render at Maximum Depth: on.
-  - Profile High, Level 4.2.
+  - Profile Main, Tier Main, Level 4.1.
 - Bitrate Encoding: **VBR, 2 pass**.
   - Target Bitrate: **6.04 Mbps**.
   - Maximum Bitrate: **8.46 Mbps**.

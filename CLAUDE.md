@@ -17,5 +17,7 @@
   - `school_voiceover.mp4` and `school_sfx.mp4`, each under 68 MB with AAC 320 kbps;
   - `school_master_for_adobe.mp4`;
   - the two WAVs.
+  All three MP4s are H.265 / HEVC (Main, tagged hvc1), not H.264: the user asked for H.265.
+  No paper or typing sounds (the user finds them annoying).
   Rebuild with `school/encode.sh` and check with `school/verify.py`. Sounds and narration are in
   `school/sfx/` and `school/vo/`; reuse them.

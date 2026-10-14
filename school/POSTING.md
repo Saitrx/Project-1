@@ -4,7 +4,8 @@
 - [ ] With narrator: `output/school_voiceover.mp4`.
 - [ ] Sound effects only: `output/school_sfx.mp4`. Use it with on-screen captions only, or with your
   own voice recorded in the TikTok app.
-- Both files are 1080x1920, 30 fps, H.264 High with AAC 320 kbps, 85.5 s long and under 68 MB.
+- Both files are 1080x1920, 30 fps, H.265 / HEVC (Main, tagged hvc1, which TikTok and iPhones play
+  natively) with AAC 320 kbps, 85.5 s long and under 68 MB.
 
 **Before uploading**
 - [ ] Watch the file once on your phone, start to finish, with sound on.
