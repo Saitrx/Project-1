@@ -11,6 +11,7 @@ JavaScript Canvas 2D and rendered deterministically in headless Chromium.
 | `school_sfx.mp4` | Picture and sound effects only. Under 68 MB. |
 | `school_master_for_adobe.mp4` | Picture only, for editing (see `ADOBE_EXPORT.md`). |
 | `school_sfx.wav`, `school_sfx_vo.wav` | The two soundtracks: 48 kHz, 24-bit, about -14 LUFS. |
+| `school_cover.png` | TikTok cover with the title, 1080x1920 (`node cover.mjs`). |
 | `VERIFY.md` | ffprobe / loudness verification report. |
 
 Other docs:

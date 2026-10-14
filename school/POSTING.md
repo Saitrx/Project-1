@@ -20,8 +20,10 @@
   and two sets would overlap.
 
 **Post details**
-- [ ] Cover: pick the frame at about 0:03 (the bored boy and the clock) or 0:08 (the school
-  crumbling into dust). Keep any cover text off the bottom 20%.
+- [ ] Cover: `output/school_cover.png` (1080x1920, the title over the school crumbling at 0:08).
+  In the upload screen tap **Select cover / Edit cover**, then **Upload** (or "Add from gallery")
+  and pick the PNG. The title sits inside the 3:4 profile-grid crop, so it stays readable in your
+  grid. If your app only lets you pick a frame, take the one at about 0:08.
 - [ ] Caption idea: "What if every school disappeared overnight? 📚💨 #whatif #school #education
   #kids #animation #storytime"
 - [ ] Hook: the first line is spoken in the first second ("What if all the schools disappeared?").
