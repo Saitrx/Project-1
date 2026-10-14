@@ -18,6 +18,8 @@
   - `school_master_for_adobe.mp4`;
   - the two WAVs.
   All three MP4s are H.265 / HEVC (Main, tagged hvc1), not H.264: the user asked for H.265.
-  No paper or typing sounds (the user finds them annoying).
+  No paper or typing sounds, and no yawns, sighs or gasps ("the ahhh sound"): the user finds them
+  annoying. Effects are set by loudness against the narrator (`lu=` in `school/audio/mix.py`); no
+  effect should be louder than the narrator. The first 5 s matter most to the user.
   Rebuild with `school/encode.sh` and check with `school/verify.py`. Sounds and narration are in
   `school/sfx/` and `school/vo/`; reuse them.

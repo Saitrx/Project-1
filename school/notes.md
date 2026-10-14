@@ -212,6 +212,20 @@ right, and there wasn't enough real environment. For v2:
   - repeated actions use different takes, pitches and levels;
   - ambience beds are high-passed (their wind rumble only muddies the mix), and hissy beds are
     softened.
+- **Second round of feedback:** "the ahhh sound sucks, kinda loud, used too much", and the first
+  5 seconds must be perfect.
+  - Every yawn, sigh and gasp is gone (`boy_yawn`, `boy_sigh`, `girl_sigh`, `kids_gasp`, and the
+    breathy `breath_whoosh` at the end).
+  - The levels were the deeper problem. Each clip had been level-matched on its own, so short
+    vocal clips came out louder than the narrator: the gasp +6.7 LU, the sniffle +7.4, "what?" +5,
+    the cheers +8.
+  - Now every cue has a loudness target in LU against the narrator (`lu=` in `audio/mix.py`,
+    measured as EBU R128 momentary loudness):
+    - beds -12 to -22;
+    - background details -15 to -19;
+    - foreground details -8 to -14;
+    - only the pop and the first burst of the cheer come close to the voice (-3).
+  - Measured in the narrated mix, no effect is louder than 6.7 LU under the narrator.
 - **Timing comes from the scene code:**
   - fall landings use the same physics (`FALL_G`);
   - jump take-offs and landings come from `jumpMotion` (worked out with a small script);
@@ -222,17 +236,17 @@ right, and there wasn't enough real environment. For v2:
 
 | Scene | Sounds (`sfx/*.mp3`) |
 | --- | --- |
-| 1 classroom | `classroom_tone` room tone. `clock_tick` on each second (the second hand), across the room. A stretching yawn at the back, a yawn behind a hand at the front (`boy_yawn`, muffled). The bored boy's `boy_sigh` just after the opening question (3.3 s). `chair_creak`. |
-| 2 the pop | `field_morning` and `breeze` outside. The school's own clock ticks far off until the pop. The air is drawn in as the blue dot swells, then `vanish_whoomp` on the pop and `dust_gust` carrying the dust off to the right. `kids_gasp` while they hang in the air. Each kid's landing (a soft `hop_thump` plus a little low `grass_thud`) at its own physics time and screen position. `kid_oof` (with a giggle). |
+| 1 classroom | Kept simple, because the first 5 s matter most. A quiet room (`classroom_tone`) and birds behind the window (`garden_birds`, softened as through glass). The wall `clock_tick` on each second, starting with the very first frame. After the question (2.6-5.2 s) the ticking clock is the whole sound: the boredom beat. One soft `chair_creak` as the girl at the back slumps down. |
+| 2 the pop | `field_morning` and `breeze` outside. The school's own clock ticks far off until the pop. The air is drawn in as the blue dot swells, then `vanish_whoomp` on the pop and `dust_gust` carrying the dust off to the right. Each kid's landing (a soft `hop_thump` plus a little low `grass_thud`) at its own physics time and screen position. `kid_oof` (with a giggle). |
 | 3 confusion | `kids_murmur` growing as the camera pushes in. Short `grass_steps` as four kids get up. `boy_what` and `girl_huh` on two shrugs, after the narration line. |
 | 4 celebration | `kids_cheer` bursting as they jump up, `kids_run` for the two runners, `girl_yay` as she tosses her homework (no paper sound), `high_five` at the top of the jump, landings, `kid_wheee` from the spinning girl, `kids_laugh`, `kids_clap`, dancing footsteps (`grass_steps_alt`), every jump landing. The kids drop back while the camera is on the teachers: `woman_tsk`, `man_groan`. A second cheer and laugh as the camera returns. |
 | 5 montage | Birds outside the bedroom window (`garden_birds`), kids far off in the park (`park_far_kids`), `breeze`. The sleeper snores, and again right after "No alarms" (`snore`). `swing_chains` creaks at the bottom of each swing. The park kid's jump landings. The backpack's swish (`air_swish`, pitched down), `backpack_land`, the bag kid's landing. |
 | 6 globe | `hall_air` only (a diagram). The dots appear with a fine `sand_trickle` sprinkle, then go out in three waves: three soft `candle_puff`s moving east to west. No ticking count. |
-| 7 curb | `street_evening`, `leaves_skitter`, `breeze`, a `car_far` passing. The calendar inset's swish. `ball_roll` (made for v2): the nudge and a gritty roll that slows and fades, panned along the ball's path. `boy_sigh_alt` and `girl_sigh` after the ball passes. A `dog_far` barking far away. |
+| 7 curb | `street_evening`, `leaves_skitter`, `breeze`, a `car_far` passing. The calendar inset's swish. `ball_roll` (made for v2): the nudge and a gritty roll that slows and fades, panned along the ball's path. A `dog_far` barking far away. |
 | 8 literacy | `hall_air`, then `street_evening` around the LIBRARY sign in the inset. The frames swish on; each bar fills like sand pouring in (`sand_trickle`); the Today bar drains like sand running out. `boy_hmm` once the line is over. |
 | 9 future | `hospital_corridor` with the flickering `light_flicker` buzz (it dips with the tube and stops when it dies) and a `door_far` closing down the corridor. Then `bridge_wind` and `river`, with `crane_creak` as the hook swings. Then `runway_wind` and the windsock (`flag_flap`). A soft `air_swish` as each panel slides onto the page. |
-| 10 sad | `dusk_crickets`, `tree_leaves`, `breeze`. The friends' footsteps walking away and fading (`steps_away_gravel`, two layers). The kid's `boy_sniffle`, then a slower `boy_sigh`. |
-| 11 ending | The field again (`field_morning`, `breeze`), quieter. The same sigh, quieter, and the same clock ticks (76-81 s, with the classroom's room sound, like a memory). The chalk board blows away (`dust_gust`, softened). The last ring with `breath_whoosh` (81.5 s), then silence. |
+| 10 sad | `dusk_crickets`, `tree_leaves`, `breeze`. The friends' footsteps walking away and fading (`steps_away_gravel`, two layers). The kid's `boy_sniffle`. |
+| 11 ending | The field again (`field_morning`, `breeze`), quieter. The same clock ticks (76-81 s, with the classroom's room sound, like a memory). The chalk board blows away (`dust_gust`, softened). The last ring with a soft echo of the opening pop (`vanish_whoomp`, 81.5 s), then silence. |
 
 **Mix (`audio/mix.py`, numpy engine `audio/engine.py`)**
 - Clips are normalised, placed on beds and spot buses, and looped with equal-power crossfades.
@@ -245,8 +259,8 @@ right, and there wasn't enough real environment. For v2:
     cheer and the ball come back up between lines.
   - A ceiling also keeps the effects at least 6.5 dB under the voice during speech, even at the
     loudest moments.
-  - A few loud moments that land on words (the cheer's first second, the yawns, the backpack, the
+  - A few loud moments that land on words (the cheer's first second, the backpack, the
     puffs, the bridge wind, the ending ticks) get a further 2-4 dB in this version only
     (`VO_RIDES`); the effects-only version keeps them full.
-  - Measured: the voice sits about 10.6 dB above the effects (median of 0.5 s windows while
-    speaking).
+  - Measured: the voice sits about 23 dB above the effects in the speech band (median of 0.5 s
+    windows while speaking; v1 was 10.6 dB, too close).

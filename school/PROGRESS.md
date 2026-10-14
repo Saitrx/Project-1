@@ -9,10 +9,10 @@ with the narrated mix is in `preview/school_v2_preview_720p.mp4` (25 MB).
 
 | Output | Result |
 | --- | --- |
-| `output/school_voiceover.mp4` | 67.8 MB. H.265 / HEVC Main 4.1 (hvc1), 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.0 LUFS, true peak -1.7 dBTP. |
-| `output/school_sfx.mp4` | 67.8 MB. Same video. -14.3 LUFS, true peak -1.8 dBTP. |
+| `output/school_voiceover.mp4` | 67.8 MB. H.265 / HEVC Main 4.1 (hvc1), 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.2 LUFS, true peak -1.7 dBTP. |
+| `output/school_sfx.mp4` | 67.7 MB. Same video. -14.2 LUFS, true peak -1.7 dBTP. |
 | `output/school_master_for_adobe.mp4` | 85.3 MB. Video only, H.265 / HEVC Main 4.1 (hvc1), 8 Mbps two-pass. |
-| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.2 / -14.0 LUFS, true peak -2.0 dBTP (-1.7 dBFS after an AAC 320k round trip). |
+| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.1 / -14.2 LUFS, true peak -2.0 dBTP (-1.7 dBFS after an AAC 320k round trip). |
 
 ## v2: what changed after the feedback on v1
 Your feedback on v1:
@@ -52,6 +52,20 @@ What changed:
   - the curb girl sighs after the ball has rolled past her (47.6 s).
 - **Export:** all three MP4s are now H.265 / HEVC (Main 4.1, `hvc1`), with the same bitrates and
   size limits.
+
+**v2.1 (second round of feedback):**
+- Your feedback: "the ahhh sound sucks, kinda loud, used too much", and the first 5 seconds must
+  be perfect.
+- All yawns, sighs and the kids' gasp are removed.
+- The opening is now:
+  - the clock's tick on the first frame, then the narrator;
+  - a quiet room with birds behind the window;
+  - after the question, the ticking clock alone (with one soft chair creak).
+- Every effect is now levelled by loudness against the narrator. Before, short clips like the
+  gasp, the sniffle and "what?" came out 5-8 LU louder than the voice; now none is louder than
+  6.7 LU under it.
+- The video stream is unchanged; the new soundtracks were muxed onto it and `verify.py` passes
+  again.
 
 **QA pass 3 (v2):**
 - low-res frames of the whole film, with 0.1 s sheets of the pop, the celebration, the toss and
