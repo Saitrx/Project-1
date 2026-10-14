@@ -18,7 +18,7 @@ const L5 = VO[4].chunks.map((c) => c.t); // No homework / No tests / No alarms
 const INSETS = [
   { id: 'sleep', x: 540, y: 455, r: 315, t0: 27.65, hi: L5[2] },
   { id: 'park', x: 305, y: 975, r: 265, t0: 27.9, hi: L5[1] },
-  { id: 'bag', x: 785, y: 1066, r: 255, t0: 28.15, hi: Math.max(L5[0], 28.45) },
+  { id: 'bag', x: 785, y: 1040, r: 255, t0: 28.15, hi: Math.max(L5[0], 28.45) },
 ];
 
 export async function build(env) {
@@ -385,7 +385,7 @@ export async function build(env) {
       // faint concentric construction rings (the film's paper backdrop)
       for (let i = 1; i < 6; i++) ring(g, 540, 900, 180 * i + ((t * 12) % 180), { width: 2, color: '#9bb3d6', alpha: 0.18, dashed: i % 2 === 0 });
       const z = 1 + (t - 27.5) * 0.008;
-      setCam(g, S, 540, 920, z);
+      setCam(g, S, 540, 700 + 260 / z, z); // slow push anchored at y 700 (keeps the insets clear of the captions)
       // the blue dot sits at the heart of the cluster, like the film
       blueDot(g, 540, 800, 13, 1);
       for (const I of INSETS) inset(g, I, t);

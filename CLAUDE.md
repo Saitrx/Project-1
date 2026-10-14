@@ -12,3 +12,10 @@
 - The user uploads the dinosaur voiceover video to TikTok, so `dinos/final/dinosaurs_voiceover.mp4`
   follows their TikTok spec: under 72 MB, 1080x1920, H.264 at the highest bitrate that fits (about
   9 Mbps for 60 s), AAC 256 kbps stereo. It's rendered with `?nospeckle`; see `dinos/encode_tiktok.sh`.
+- The schools video ("What if all the schools disappeared?", 85.5 s) lives in `school/` (Canvas 2D,
+  see `school/README.md`). Its deliverables are in `school/output/`:
+  - `school_voiceover.mp4` and `school_sfx.mp4`, each under 68 MB with AAC 320 kbps;
+  - `school_master_for_adobe.mp4`;
+  - the two WAVs.
+  Rebuild with `school/encode.sh` and check with `school/verify.py`. Sounds and narration are in
+  `school/sfx/` and `school/vo/`; reuse them.

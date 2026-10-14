@@ -76,8 +76,24 @@ the reference contact sheets.
 | 10 sad | 9 | 9 | 9 | 9 | 9 | 9 | Kid under the tree hugging his knees; the four friends turn away one by one and walk off; leaves fall. |
 | 11 ending | 9 | 9 | 9 | 9 | 9 | 9 | Same boy, same framing and pose as scene 1. The chalk-ghost classroom with the ticking clock, the board blows away, a final ring, silence, fade to cream. |
 
-**Pass 2**: the full-quality render, frames every 0.5 s. Results are below once the render is
-done.
+**Pass 2**: the full-quality render (`out/frames`), every 0.5 s (contact sheets `out/qa2_sNN.png`),
+plus 100% crops of the captions, insets and line art.
+
+| Scene | a | b | c | d | e | f | Notes and fixes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 classroom | 9 | 9 | 9 | 9 | 9 | 9 | Caption beside the boy; clock ticks on the second hand. |
+| 2 pop | 9 | 9 | 9 | 9 | 9 | 9 | The pop lands just after "One second it's there..." (7.62 s); paper scraps and chalk dust; soft landings. |
+| 3 confused | 9 | 9 | 9 | 9 | 9 | 9 | The closer camera reads the head turns, stand-ups and shrugs; teachers frozen with chalk and books. |
+| 4 celebrate | 9 | 9 | 9 | 9 | 9 | 9 | The pan to the teachers lands on "The teachers aren't smiling." |
+| 5 montage | 9 | 9 | 9 | 9 | 8→9 | 9 | The montage camera shifted down 40 px and zoomed, so the caption still touched the backpack inset. The push is now anchored at y 700 and the bag inset sits at y 1040; frames 807-1049 were re-rendered. |
+| 6 globe | 9 | 10 | 9 | 9 | 9 | 9 | Crisp caption; the 2020 / 1.5 billion count is in sync. |
+| 7 curb | 9 | 9 | 9 | 9 | 9 | 9 | The ball rolls past all four kids; nobody chases it. |
+| 8 literacy | 9 | 9 | 9 | 9 | 9 | 9 | Bars, drain and sign scramble are all on their words. |
+| 9 future | 9 | 9 | 9 | 9 | 9 | 9 | Each panel arrives on its word (doctors / engineers / pilots). |
+| 10 sad | 9 | 9 | 9 | 9 | 9 | 9 | Head down, the lift to watch the friends go, the friends drift apart. |
+| 11 ending | 9 | 9 | 9 | 9 | 9 | 9 | Same pose as the opening, the clock ticks return, a last ring, then silence and a fade to cream. |
+
+Every scene scores 9 or more on every criterion after pass 2.
 
 ## SFX nodes (flow kSenice3CXT0OF5IiamY)
 All 33 are generated and downloaded to `sfx/<name>.mp3` (see `notes.md` for what each one is
