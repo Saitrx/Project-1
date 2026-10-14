@@ -86,8 +86,10 @@ export async function build(env) {
   const THROWS = [TOSS];
   const tossRng = makeRng(301);
   const sheets = Array.from({ length: 6 }, (_, i) => ({
-    vx: tossRng.range(-90, 90) + (i - 2.5) * 22,
-    vy: tossRng.range(-430, -330),
+    // a strong two-handed toss: the stack fans out wide and rises above the grown-ups' heads
+    // (so no sheet hangs in front of the teacher behind her), then drifts down
+    vx: tossRng.range(-150, 110) + (i - 2.5) * 40,
+    vy: tossRng.range(-680, -560),
     fl: tossRng.range(2.2, 3.4),
     ph: tossRng.range(0, TAU),
     sway: tossRng.range(18, 34),

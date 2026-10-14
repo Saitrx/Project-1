@@ -25,9 +25,11 @@ Other docs:
   - Every frame comes from `renderFrame(n)` with seeded randomness, so re-renders are identical.
 - **Narration and sounds**
   - ElevenLabs (`eleven_v4` voice Alec; `eleven_text_to_sound_v2` effects), saved in `vo/` and
-    `sfx/` and reused.
+    `sfx/` and reused. Both takes of every v2 sound are in `sfx2/`; `audio/pick_takes.py` copies
+    the better one to `sfx/` (report in `audio/takes_report.txt`).
   - `audio/vo_prep.py` fits the lines to the scenes.
-  - `audio/mix.py` mixes both soundtracks. There is no music.
+  - `audio/mix.py` mixes both soundtracks: per-place ambience, effects placed and distanced on the
+    on-screen events. There is no music, and no paper or typing sounds.
 
 ## Rebuild
 

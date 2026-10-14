@@ -191,7 +191,7 @@ def spots(b, big, crowd):
         tick(b, s, pan=-0.3, verb=ROOM)
     put(b, 'boy_yawn', 0.62, pitch=1.1, gain=-16, pan=0.3, lp=7000, fout=0.4, verb=ROOM)
     put(b, 'boy_yawn', 1.55, start=0.1, dur=1.9, pitch=0.97, gain=-21, pan=-0.55, lp=2200, fout=0.5, verb=ROOM)
-    put(b, 'boy_sigh', 3.3, gain=-5, pan=0.35, fout=0.5, verb=ROOM)
+    put(b, 'boy_sigh', 3.38, gain=-5, pan=0.35, fout=0.5, verb=ROOM)
     put(b, 'chair_creak', 4.35, dur=1.0, gain=-14, pan=-0.2, fout=0.25, verb=ROOM)
     # the camera leaves through the window: a soft breath of air
     put(b, 'air_swish', 5.0, pitch=0.8, gain=-19, fout=0.3)

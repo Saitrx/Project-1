@@ -20,7 +20,7 @@
 
 **Post details**
 - [ ] Cover: pick the frame at about 0:03 (the bored boy and the clock) or 0:08 (the school
-  bursting into paper). Keep any cover text off the bottom 20%.
+  crumbling into dust). Keep any cover text off the bottom 20%.
 - [ ] Caption idea: "What if every school disappeared overnight? 📚💨 #whatif #school #education
   #kids #animation #storytime"
 - [ ] Hook: the first line is spoken in the first second ("What if all the schools disappeared?").
