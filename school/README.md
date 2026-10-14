@@ -7,9 +7,9 @@ JavaScript Canvas 2D and rendered deterministically in headless Chromium.
 
 | File | What |
 | --- | --- |
-| `school_voiceover.mp4` | Picture, sound effects and narrator. FHD 1080x1920, 60 fps, H.264, 20 Mbps, AAC 320 kbps (about 215 MB, stored with Git LFS). |
-| `school_sfx.mp4` | Picture and sound effects only. Same video. |
-| `school_master_for_adobe.mp4` | Picture only, for editing (see `ADOBE_EXPORT.md`). |
+| `parts/school_voiceover_part1..3.mp4` | Picture, sound effects and narrator, in 3 parts (0-34 s, 34-58 s, 58-85.5 s), each under GitHub's 100 MB limit. FHD 1080x1920, 60 fps, H.264, 20 Mbps, AAC 320 kbps. Put back together they are the full video, frame for frame. |
+| `parts/school_sfx_part1..3.mp4` | The same with sound effects only. |
+| `school_voiceover.mp4`, `school_sfx.mp4`, `school_master_for_adobe.mp4` | The full-length files (about 215 MB each). They are made by `./encode.sh` but not kept in git (over GitHub's 100 MB limit); `./split.sh` makes the parts from them. |
 | `school_sfx.wav`, `school_sfx_vo.wav` | The two soundtracks: 48 kHz, 24-bit, about -14 LUFS. |
 | `school_cover.png` | TikTok cover with the title, 1080x1920 (`node cover.mjs`). |
 | `VERIFY.md` | ffprobe / loudness verification report. |
@@ -39,7 +39,8 @@ npm install                                   # once (also needs ffmpeg and a gl
 python3 audio/vo_prep.py                      # fit the narration -> out/vo/, src/vo_timing.js
 python3 audio/mix.py                          # -> output/school_sfx.wav, output/school_sfx_vo.wav
 node render.mjs --from 0 --to 5130 --out out/frames --workers 3    # PNG frames, 60 fps (2160x3840 -> 1080x1920)
-./encode.sh                                   # -> the three MP4s
+./encode.sh                                   # -> the three full-length MP4s
+./split.sh                                    # -> output/parts/ (3 parts each, under 100 MB)
 python3 verify.py                             # -> output/VERIFY.md
 ```
 

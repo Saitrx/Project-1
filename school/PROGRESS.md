@@ -3,16 +3,22 @@
 Project folder: `school/` (Canvas 2D, same pipeline as `dinos/`). Branch: `claude/adoring-thompson-x0mjor`.
 
 ## Status
-**v2 done** (after the feedback on v1, see below). Outputs are rebuilt and every `verify.py` check
-passes (`output/VERIFY.md`). The PNG frames were deleted after verification. A 720p H.265 preview
-with the narrated mix is in `preview/school_v2_preview_720p.mp4` (25 MB).
+**Current export (latest request): FHD only, H.264, 60 fps, 20 Mbps.** Re-rendered at true 60 fps
+(5130 frames, every one drawn; nothing is doubled or interpolated). One two-pass H.264 encode is
+shared by all three files, so there is no lower-quality version. Every `verify.py` check passes
+(`output/VERIFY.md`). The PNG frames were deleted after verification.
 
 | Output | Result |
 | --- | --- |
-| `output/school_voiceover.mp4` | 67.8 MB. H.265 / HEVC Main 4.1 (hvc1), 6.0 Mbps two-pass, -g 60, Rec.709, 30 fps CFR. AAC 320k 48 kHz. -14.2 LUFS, true peak -1.7 dBTP. |
-| `output/school_sfx.mp4` | 67.7 MB. Same video. -14.2 LUFS, true peak -1.7 dBTP. |
-| `output/school_master_for_adobe.mp4` | 85.3 MB. Video only, H.265 / HEVC Main 4.1 (hvc1), 8 Mbps two-pass. |
-| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.1 / -14.2 LUFS, true peak -2.0 dBTP (-1.7 dBFS after an AAC 320k round trip). |
+| `output/parts/school_voiceover_part1..3.mp4` | 90.2 / 47.6 / 78.9 MB (0-34 s, 34-58 s, 58-85.5 s). 1080x1920, H.264 High 4.2 (avc1), 60 fps CFR, 20 Mbps two-pass (19.95 measured over the whole), 2 s GOP, Rec.709. AAC 320k 48 kHz, -14.2 LUFS, true peak -1.7 dBTP. Joined, the parts equal the full video frame for frame (5130 identical frames, checked with framemd5). |
+| `output/parts/school_sfx_part1..3.mp4` | 90.2 / 47.6 / 78.9 MB. Same video, effects-only soundtrack. |
+| `output/school_voiceover.mp4`, `school_sfx.mp4`, `school_master_for_adobe.mp4` | 216.7 / 216.6 / 213.3 MB full-length files, made by `encode.sh`, not kept in git. |
+| `output/school_sfx.wav`, `output/school_sfx_vo.wav` | 48 kHz, 24-bit, -14.1 / -14.2 LUFS, true peak -2.0 dBTP. |
+| `output/school_cover.png` | 1080x1920 TikTok cover with the title. |
+
+The full MP4s are over GitHub's 100 MB limit, and Git LFS could not be pushed from this session (the
+network policy blocks lfs.github.com). So `split.sh` cuts each into 3 parts on keyframes, copying the
+video (no re-encode), and the parts are what is committed.
 
 ## v2: what changed after the feedback on v1
 Your feedback on v1:

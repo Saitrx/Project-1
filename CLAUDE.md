@@ -19,7 +19,10 @@
   - the two WAVs.
   The user's export spec (latest): FHD only, 1080x1920, H.264, true 60 fps (rendered at 60, 5130
   frames), 20 Mbps two-pass, one shared video stream, no lower-quality versions or previews. The
-  MP4s are about 215 MB, so `school/output/*.mp4` is stored with Git LFS (`.gitattributes`).
+  full MP4s are about 215 MB, over GitHub's 100 MB limit, and Git LFS can't be pushed from the cloud
+  sessions (the network policy blocks lfs.github.com). So, at the user's suggestion, they are split
+  into 3 parts each by `school/split.sh` (keyframe cuts at 34 s and 58 s, video copied, frame-exact)
+  and only `school/output/parts/` is committed; the full files are gitignored.
   No paper or typing sounds, and no yawns, sighs or gasps ("the ahhh sound"): the user finds them
   annoying. Effects are set by loudness against the narrator (`lu=` in `school/audio/mix.py`); no
   effect should be louder than the narrator. The first 5 s matter most to the user.

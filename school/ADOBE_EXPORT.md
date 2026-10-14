@@ -7,7 +7,7 @@ Adobe Media Encoder. The ready-to-post files are already in `output/` (see `POST
 
 | File | What it is |
 | --- | --- |
-| `output/school_master_for_adobe.mp4` | Picture only. 1080x1920, 60 fps constant, H.264 High 4.2, 20 Mbps two-pass, yuv420p, Rec.709 tags, closed 2 s GOP, captions burned in. The same video stream as the two delivery files. |
+| `output/school_master_for_adobe.mp4` | Picture only. 1080x1920, 60 fps constant, H.264 High 4.2, 20 Mbps two-pass, yuv420p, Rec.709 tags, closed 2 s GOP, captions burned in. The same video stream as the two delivery files. It is about 215 MB, so it is not in git: make it with `./encode.sh`, or use the 3 parts in `output/parts/` (put `school_sfx_part1..3.mp4` one after another on V1 and mute their audio). |
 | `output/school_sfx.wav` | Sound effects only. 48 kHz, 24-bit, stereo, about -14 LUFS, true peak below -1 dBTP. |
 | `output/school_sfx_vo.wav` | Sound effects plus narrator (effects ducked 7 dB under the voice). Same format and loudness. |
 

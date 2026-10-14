@@ -5,3 +5,7 @@ ref/
 !output/*.wav
 reference_*.mp4
 vo/takes/
+# full-length videos are over GitHub's 100 MB limit: made by encode.sh, split by split.sh
+output/school_voiceover.mp4
+output/school_sfx.mp4
+output/school_master_for_adobe.mp4

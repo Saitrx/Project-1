@@ -45,7 +45,7 @@ def check(name, cond, detail):
 
 def video_checks(f, d, v, want_audio):
     size = int(d['format']['size'])
-    rows.append(f"| {f}: size | info | {size / 1e6:.1f} MB (stored with Git LFS: over GitHub's 100 MB limit) |")
+    rows.append(f"| {f}: size | info | {size / 1e6:.1f} MB (not in git: over GitHub's 100 MB limit, see output/parts/) |")
     check(f'{f}: duration', abs(float(d['format']['duration']) - DUR) < 0.05, f"{float(d['format']['duration']):.3f} s")
     check(f'{f}: codec/profile/level', v['codec_name'] == 'h264' and v['profile'] == 'High' and v['level'] == 42 and v.get('codec_tag_string') == 'avc1',
           f"{v['codec_name']} {v['profile']} level {v['level'] / 10:.1f}, tag {v.get('codec_tag_string')}")
@@ -78,6 +78,23 @@ def main():
         d = probe(os.path.join(OUT, f))
         v = [s for s in d['streams'] if s['codec_type'] == 'video'][0]
         video_checks(f, d, v, audio)
+    # the 3-part split (split.sh): each part under GitHub's 100 MB limit, same video, frames add up
+    cuts = [(0, 34), (34, 58), (58, DUR)]
+    for name in ('school_voiceover', 'school_sfx'):
+        total = 0
+        for i, (a, b) in enumerate(cuts, 1):
+            f = f'parts/{name}_part{i}.mp4'
+            d = probe(os.path.join(OUT, f))
+            v = [s for s in d['streams'] if s['codec_type'] == 'video'][0]
+            au = [s for s in d['streams'] if s['codec_type'] == 'audio'][0]
+            size = int(d['format']['size'])
+            n = int(v.get('nb_frames', 0))
+            total += n
+            check(f'{f}', size < 100e6 and v['codec_name'] == 'h264' and v['profile'] == 'High' and v['level'] == 42
+                  and (v['width'], v['height']) == (1080, 1920) and v['r_frame_rate'] == f'{FPS}/1' and n == round((b - a) * FPS)
+                  and au['codec_name'] == 'aac' and int(au['sample_rate']) == 48000 and au['channels'] == 2,
+                  f"{size / 1e6:.1f} MB, {v['codec_name']} {v['profile']} {v['level'] / 10:.1f}, {v['width']}x{v['height']} {v['r_frame_rate']}, {n} frames ({a}-{b} s), aac")
+        check(f'parts/{name}: frames add up', total == FRAMES, f'{total} of {FRAMES} frames')
     for f in ('school_sfx.wav', 'school_sfx_vo.wav'):
         d = probe(os.path.join(OUT, f))
         a = d['streams'][0]

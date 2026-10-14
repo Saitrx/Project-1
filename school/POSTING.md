@@ -1,15 +1,19 @@
 # Posting checklist (TikTok)
 
-**Pick the file**
-- [ ] With narrator: `output/school_voiceover.mp4`.
-- [ ] Sound effects only: `output/school_sfx.mp4`. Use it with on-screen captions only, or with your
-  own voice recorded in the TikTok app.
-- Both files are FHD 1080x1920, 60 fps, H.264 at 20 Mbps with AAC 320 kbps, 85.5 s long, about
-  215 MB each.
-- On GitHub they are stored with Git LFS (they are over GitHub's 100 MB limit for normal files): open
-  the file and press **Download** (the "View raw" link also gives the full video).
-- The TikTok phone app may refuse files this big on some phones (older Android limits were about
-  72 MB). If it does, upload from a computer at tiktok.com/upload, which takes much larger files.
+**Pick the files**
+- [ ] With narrator: `output/parts/school_voiceover_part1.mp4`, `_part2.mp4`, `_part3.mp4`.
+- [ ] Sound effects only: `output/parts/school_sfx_part1.mp4`, `_part2.mp4`, `_part3.mp4`. Use them with
+  on-screen captions only, or with your own voice recorded in the TikTok app.
+- The full video is split in 3 because GitHub refuses files over 100 MB. Nothing is lost: the video
+  is copied, not re-encoded, and the 3 parts put together are the full video, frame for frame.
+  - **One TikTok:** on the upload screen select all 3 parts in order (part 1, 2, 3); TikTok joins
+    them. CapCut does the same if you want to join them first.
+  - **A 3-part series:** the cuts fall between narration lines (0:34 after "No alarms", 0:58 after
+    "we slowly slide back"), so each part also stands on its own.
+- All parts are FHD 1080x1920, 60 fps, H.264 at 20 Mbps with AAC 320 kbps: 34 s (90 MB),
+  24 s (48 MB) and 27.5 s (79 MB).
+- The TikTok phone app may refuse big files on some phones (older Android limits were about 72 MB).
+  If it does, upload from a computer at tiktok.com/upload, which takes much larger files.
 
 **Before uploading**
 - [ ] Watch the file once on your phone, start to finish, with sound on.
